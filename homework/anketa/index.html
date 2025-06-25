@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .control-div {
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="control-div">
+        <a href="./../../index.html">Go back</a>
+        <a href="./index.html">Перезагрузить</a>
+    </div>
+    <script>
+        // Данные для пении 
+        var pensionAge = {
+            man: 63, 
+            woman: 58
+        }
+
+        // Дней в году, если хотим более точноее значение ставим 365.25
+        var daysInYear = 365
+
+        // Общая функция получения данных от пользователя и обработка их
+        function promptGetNotNull(message, _default = '', _type = 'String') {
+            var userStr = null
+            var result = null
+            var ogMessage = message
+
+            // Используем do, чтобы в любом случае выполнялась одна итерация
+            do {
+                userStr = prompt(message, _default)
+                // Проверка на то что в строке хоть чтото есть
+                if (userStr) {
+                    // Выбор действий по типу который мы передали в метод
+                    switch (_type) {
+                        // Проверки на строке
+                        case 'String':
+                            return userStr
+                            break;
+                        // Проверки на числе
+                        case 'Number':
+                            result = Number(userStr)
+                            //debugger
+                            if (!isNaN(result) && result > 0){
+                                return result
+                            }
+                            else{ // Этот блок надо чтобы при значении с минусом повторялся промпт 
+                                result = null
+                            }
+                            break
+                        default:
+                            // Данный кейс нужен для обрабоки, когда нет типа который мы хотим получить
+                            result = 'ЧТОТО НЕ ТАК'
+                            break
+                    }
+                }
+                
+                // Проверка для первой итерации цикла, если дошло до сюда то значит пользователь ввел чтото не так
+                if (ogMessage === message){
+                    message = 'ПЕРЕПРОВЕРЬТЕ ТО, ЧТО ВЫ ВВЕЛИ!!! ' + ogMessage
+                }
+            } while (!result) // Цикл, пока мы не получили корректный результат
+        }
+        
+        // Получаем ФИО пользователя
+        var promptSecondName = promptGetNotNull('введите вашу фамилию', 'Иванов')
+        var promptName = promptGetNotNull('введите ваше имя', 'Иван')
+        var promptFatherName = promptGetNotNull('введите ваше отчество', 'Иванович')
+
+        // Получение возраста и операции с ними
+        var promptAge = promptGetNotNull('введите ваш возраст', '20', _type = "Number")
+        var ageInDays = promptAge * daysInYear
+        var ageInFiveYears = promptAge + 5
+
+        // Получение пола и действия с ними
+        var confirmSex = confirm("Ваш пол мужской? Если да, то нажмите на \"ОК\" иначе \"Отмена\"")
+        var sexOfPerson = confirmSex ? 'Мучина' : 'Женщина'
+        var personPensionAge = confirmSex ? pensionAge.man : pensionAge.woman
+        var doPersonOnPension = promptAge >= personPensionAge ? 'да' : 'нет'
+
+        // Выведение единственного alert
+        alert(
+            'Ваше ФИО: '+ promptSecondName + ' ' + promptName + ' ' + promptFatherName+ '\n'+
+            'Ваш возраст в годах: '+ promptAge+ '\n'+
+            'Ваш возраст в днях: '+ ageInDays+ '\n'+
+            'Через 5 лет вам будет: '+ ageInFiveYears+ '\n'+
+            'Ваш пол: '+ sexOfPerson+ '\n'+
+            'Вы на пенсии: '+ doPersonOnPension+ '\n'
+        )
+    </script>
+</body>
+
+</html>
