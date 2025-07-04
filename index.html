@@ -6,39 +6,89 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
+        :root {
+            --background-start: #6d7a8b;
+            --background-end: #2e3440;
+            --grid-color: rgba(255, 255, 255, 0.05);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-color: #eceff4;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
         * {
             box-sizing: border-box;
             padding: 0;
             margin: 0;
             list-style: none;
         }
+        body{
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            
+            background-color: var(--background-end);
+            background-image:
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: -1px -1px;
+            
+        }
         h1{
             display: flex;
             align-content: center;
             justify-content: center;
+            text-align: center;
+            color: #e6e6e6;
         }
         ul{
             display: flex;
+            gap: 12px;
+            flex-direction: column;
             align-content: center;
             justify-content: center;
+            align-items: center;
+        }
+        li{
+            
         }
 
-        a{
+        
+        .div-link-button{
+            display: flex;
+            
             font-size: 32px;
+            color: var(--text-color);
+            text-decoration: none;
+
+            position: relative;
+            background: linear-gradient(90deg, #184cb4, #1f4288);
+            border: solid red 2px;
+
+            border-radius: 12px;
+            
+            padding: 16px;
+            transition: 0.2s;
         }
+        .div-link-button:hover{
+            transform: scale(110%);
+        }
+       
 
     </style>
 </head>
 
 <body>
-    <h1>Задания Невыгласа Павла - ITAcademy 2025 JS</h1>
+    <h1>Задания Невыгласа Павла<br>ITAcademy 2025 JS</h1>
     <ul>
         <li>
-            <div>
-                <a href="./homework/anketa/index.html">Домашнее задание 1</a>
+            <div >
+                <a class="div-link-button" href="./homework/anketa/index.html">Домашнее задание 1</a>
             </div>
         </li>
-        <li></li>
+        <li>
+            <div>
+                <a class="div-link-button" href="./homework/TREESUM/index.html">Домашнее задание 2</a>
+            </div>
+        </li>
         <li></li>
         <li></li>
         <li></li>
