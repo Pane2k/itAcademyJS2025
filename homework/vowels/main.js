@@ -11,6 +11,8 @@ function countVowels(str) {
     return howMuch;
 }
 
-let howMuch = countVowels(str)
+
+const userStr = prompt("Введите любую строку", str)
+let howMuch = countVowels(userStr)
 console.log("Количество гласных: " + howMuch)
-alert(`В строке "${str}" содерижится ${howMuch} гласных букв`)
+
