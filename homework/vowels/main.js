@@ -4,11 +4,11 @@ function countVowels(str) {
     
 
     // == МЕТОД ПОЛУЧЕНИЯ ЦИФРОВОГО ЗНАЧЕНИЯ БУКВ В UTF-8 == 
-    // const letters = "уеёыаоэяию"
+    // const letters = "уеёыаоэяию" // гласные буквы
     // let intLetters = []
     // for (let i = 0; i < letters.length; i++) {
-    //     intLetters[i] = Number(letters.charCodeAt(i));
-    //     intLetters[i+letters.length] = Number(letters.charCodeAt(i)-32)
+    //     intLetters[i] = Number(letters.charCodeAt(i)); // получение символа
+    //     intLetters[i+letters.length] = Number(letters.charCodeAt(i)-32) // смещение на 32 символа для получения больших букв 
     // }
 
     // == ГОТОВЫЙ МАССИВ ЦИФРОВЫХ ЗНАЧЕНИЙ ДЛЯ ОПТИМИЗАЦИИ ==
