@@ -20,8 +20,6 @@
     </div>
     <script>
         const arr = [5, "7", [4, [2], 8, [1, 3], 2], [9, ["a"]], 1, 8]
-
-
         function treeSumFullRec (arr){
             if (arr.length === 0) return 0 // Возравщаем ноль если массив имеет длинну ноль
 
@@ -45,17 +43,19 @@
         function treeSum(arr) {
             let sum = 0
             for(let i = 0; i < arr.length; i++){
-                sum -= Array.isArray(arr[i]) ? -treeSum(arr[i]):isNaN(arr[i])?0:-arr[i]
+                if(Array.isArray(arr[i])){
+                    sum += Number(treeSum(arr[i]))
+                } 
+                else if (isNaN(arr[i])){
+                    sum += 0
+                } else{
+                    sum += Number(arr[i])
+                }
             }
             return sum 
         }
-        console.time('FullRecursion')
-        treeSumFullRec(arr) // Полная рекурсия без использования циклов
-        console.timeEnd('FullRecursion')
-
-        console.time('WithFor')
         treeSum(arr) // Рекурсия с использованием цикла for, ускроение ~2-5 раз
-        console.timeEnd('WithFor')
+
 
         alert(`
 Общая сумма массива ${JSON.stringify(arr)} = ${treeSum(arr)}
