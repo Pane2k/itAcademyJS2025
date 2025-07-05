@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,39 +12,57 @@
         }
     </style>
 </head>
+
 <body>
     <div class="control-div">
         <a href="./../../index.html">Go back</a>
         <a href="./index.html">Перезагрузить</a>
     </div>
     <script>
-        const arr = [ 5, "7", [ 4, [2], 8, [1,3], 2 ], [ 9, ["a"] ], 1, 8 ]
-        
+        const arr = [5, "7", [4, [2], 8, [1, 3], 2], [9, ["a"]], 1, 8]
 
-        function treeSum (arr){
+
+        function treeSumFullRec (arr){
             if (arr.length === 0) return 0 // Возравщаем ноль если массив имеет длинну ноль
-            
+
             // Блок пременных
             let head = arr[0] // "Голова" массива 
             let tail = arr.slice(1, arr.length) // Хвост массива, все элементы от 1 элемента до последнего
             let headValue, tailValue = 0 // Значения суммы головы и хвоста массива
-            
+
             // Описание логики:
             //  1) Проверка head на массив, если массив то вызывает саму себя
             //  2) Если же нет, то проверяем на то, что это NaN
             //  3) Если это NaN то отдадим 0, чтобы не сломать логику подсчета
             //  4) Если это Number (противоположность NaN) то приводим явно head в число '-(-var)'  
             headValue = Array.isArray(head)?treeSum(head):isNaN(head)?0:-(-head) 
-            
+
             tailValue = treeSum(tail) // Вызов самой себя
             return headValue + tailValue
         }
 
+        // Новая более быстрая функция
+        function treeSum(arr) {
+            let sum = 0
+            for(let i = 0; i < arr.length; i++){
+                sum -= Array.isArray(arr[i]) ? -treeSum(arr[i]):isNaN(arr[i])?0:-arr[i]
+            }
+            return sum 
+        }
+        console.time('FullRecursion')
+        treeSumFullRec(arr) // Полная рекурсия без использования циклов
+        console.timeEnd('FullRecursion')
+
+        console.time('WithFor')
+        treeSum(arr) // Рекурсия с использованием цикла for, ускроение ~2-5 раз
+        console.timeEnd('WithFor')
+
         alert(`
 Общая сумма массива ${JSON.stringify(arr)} = ${treeSum(arr)}
         `)
-        
-        
+
+
     </script>
 </body>
+
 </html>
