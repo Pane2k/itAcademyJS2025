@@ -40,12 +40,12 @@
         }
 
         // Новая более быстрая функция
-        function treeSum(arr) {
-            /**
+        /**
              * Рекурсивная функция вычисления суммы массива чисел с вложенными массивами чисел
              * @param {number[]} arr - массив чисел, убедитесь что массив содержит только числа
              * @returns {number} - сумма вычесленных чисел
              */
+        function treeSum(arr) {
             let sum = 0
             for(let i = 0; i < arr.length; i++){
                 if(Array.isArray(arr[i])){
