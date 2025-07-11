@@ -12,20 +12,39 @@ function mood(colorsCount) {
     
     let used = {}
 
-    for (let i = 0; i < colorsCount; i++) {
-        if (Object.keys(used).length === ARR_LEN - 1) {
-            console.warn("БОЛЬШЕ НЕТ ЦВЕТОВ!!!"); break
+
+    // СТАРЫЙ КОД
+    // for (let i = 0; i < colorsCount; i++) {
+    //     if (Object.keys(used).length === ARR_LEN - 1) {
+    //         console.warn("БОЛЬШЕ НЕТ ЦВЕТОВ!!!"); break
+    //     }
+    //     const n = randomDiap(1, ARR_LEN - 1);
+    //     if (n in used) {
+    //         i--
+    //         continue
+    //     }
+    //     used[n] = true // установка флага 
+    //     const colorName = colors[n]; // установка цвета
+    //     console.log(colorName);
+    // }
+
+    // НОВЫЙ КОД БЕЗ FOR
+    let foundedCount = 0
+    while (foundedCount < colorsCount){
+        if (foundedCount === ARR_LEN - 1){
+            console.warn("БОЛЬШЕ НЕТ ЦВЕТОВ!!!")
+            break
         }
-        const n = randomDiap(1, ARR_LEN - 1);
+        const n = randomDiap(1, ARR_LEN - 1)
         if (n in used) {
-            i--
             continue
         }
-        used[n] = true // установка флага 
-        const colorName = colors[n]; // установка цвета
-        console.log(colorName);
-    }
         
+        used[n] = true
+        const colorName = colors[n]
+        console.log(colorName)
+        foundedCount++
+    }
 }
 
-mood(3);
+mood(7);

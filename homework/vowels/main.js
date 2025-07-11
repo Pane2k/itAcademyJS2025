@@ -6,7 +6,9 @@ function countVowels(str) {
 
     let howMuch = 0;
     for (let i = 0; i < str.length; i++) {
-        LETTERS_SET.has(str[i]) ? howMuch++ : 0
+        if (LETTERS_SET.has(str[i])){
+            howMuch++
+        }
     }
     return howMuch;
 }

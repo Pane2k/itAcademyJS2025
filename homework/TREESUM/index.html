@@ -19,7 +19,7 @@
         <a href="./index.html">Перезагрузить</a>
     </div>
     <script>
-        const arr = [5, "7", [4, [2], 8, [1, 3], 2], [9, ["a"]], 1, 8]
+        const arr = [5, 7, [4, [2], 8, [1, 3], 2], [9, []], 1, 8]
         function treeSumFullRec (arr){
             if (arr.length === 0) return 0 // Возравщаем ноль если массив имеет длинну ноль
 
@@ -41,22 +41,25 @@
 
         // Новая более быстрая функция
         function treeSum(arr) {
+            /**
+             * Рекурсивная функция вычисления суммы массива чисел с вложенными массивами чисел
+             * @param {number[]} arr - массив чисел, убедитесь что массив содержит только числа
+             * @returns {number} - сумма вычесленных чисел
+             */
             let sum = 0
             for(let i = 0; i < arr.length; i++){
                 if(Array.isArray(arr[i])){
-                    sum += Number(treeSum(arr[i]))
+                    sum += treeSum(arr[i])
                 } 
-                else if (isNaN(arr[i])){
-                    sum += 0
-                } else{
-                    sum += Number(arr[i])
+                else{
+                    sum += arr[i]
                 }
             }
             return sum 
         }
         treeSum(arr) // Рекурсия с использованием цикла for, ускроение ~2-5 раз
 
-
+        console.log(treeSum(arr))
         alert(`
 Общая сумма массива ${JSON.stringify(arr)} = ${treeSum(arr)}
         `)
