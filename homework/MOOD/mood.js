@@ -9,10 +9,9 @@ function mood(colorsCount) {
     const colors = ['','красный', 'оранжевый', 'жёлтый', 
             'зелёный', 'голубой', 'синий', 'фиолетовый'];
     const ARR_LEN = colors.length 
-    
     let used = {}
-
-
+    
+    
     // СТАРЫЙ КОД
     // for (let i = 0; i < colorsCount; i++) {
     //     if (Object.keys(used).length === ARR_LEN - 1) {
