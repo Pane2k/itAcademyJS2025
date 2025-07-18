@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .control-div {
+            display: flex;
+            flex-direction: column;
+        }
+        .buttons-div{
+            margin-top: 16px;
+            display: grid;
+            justify-content: center;
+            grid-template-columns: auto auto;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="control-div">
+        <a href="./../../index.html">Go back</a>
+        <a href="./index.html">Перезагрузить</a>
+    </div>
+    <div class="buttons-div">
+        <button onclick="userSetNewDrink()">Ввод информации о напитке</button>
+        <button onclick="userGetDrink()">Получение информации о напитке</button>
+        <button onclick="userDeleteDrink()">Удаление информации о напитке</button>
+        <button onclick="userGetAllDrinks()">Перечень всех напитков</button>
+    </div>
+
+
+    <script src="ObjStorageClass.js"></script>
+    <script src="main.js"></script>
+    <script>
+        
+    </script>
+</body>
+</html>

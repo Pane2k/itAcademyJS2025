@@ -9,7 +9,8 @@ function ObjStorageFunc(){
         return _storage[key]
     }
     this.deleteValue = function(key){
-        return _storage[key] ? delete _storage[key] : false
+        return (key in _storage) ? delete _storage[key] : false
+        // return _storage[key] ? delete _storage[key] : false
     }
     this.getKeys = function(){
         return Object.keys(_storage)
