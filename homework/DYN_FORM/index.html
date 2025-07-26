@@ -4,8 +4,14 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>dyn_form</title>
     <style>
+
+        .control-div {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 32px;
+        }
         .formElementWrap {
             display: flex;
             width: 100%;
@@ -27,6 +33,12 @@
 </head>
 
 <body>
+
+    <div class="control-div">
+        <a href="./../../index.html">Go back</a>
+        <a href="./index.html">Перезагрузить</a>
+    </div>
+    <hr>
     <div class="aroundForm">
         <div id="dyn_form_id"></div>
         <hr>

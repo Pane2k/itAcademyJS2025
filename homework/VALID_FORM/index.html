@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .form-row {
+            display: flex;
+            flex-direction: row;
+            padding: 2px;
+        }
+
+        #developers {
+            margin-left: 50px;
+        }
+
+        #siteName {
+            margin-left: 39px;
+        }
+
+        #siteUrl {
+            margin-left: 71px;
+        }
+
+        #launchDate {
+            margin-left: 15px;
+        }
+
+        #visitors {
+            margin-left: 2px;
+        }
+
+        #email {
+            margin-left: 32px;
+        }
+
+        #category {
+            margin-left: 25px;
+        }
+
+        .radio-group {
+            margin-left: 56px;
+        }
+
+        #allowReviews {
+            margin-left: 17px;
+        }
+
+        .description-wrap {
+            flex-direction: column;
+        }
+
+        input.input-error,
+        textarea.input-error,
+        select.input-error {
+            border-color: red;
+        }
+
+        .error-text {
+            display: flex;
+            align-items: center;
+            color: red;
+            font-size: 12px;
+            margin: 0px;
+            margin-left: 12px;
+            min-width: 150px;
+        }
+
+        .radio-group.group-error label {
+            color: red;
+        }
+        .control-div {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 32px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="control-div">
+        <a href="./../../index.html">Go back</a>
+        <a href="./index.html">Перезагрузить</a>
+    </div>
+    <hr>
+    <div class="form-container">
+        <p>Для внесения вашего сайта в каталог, заполните форму:</p>
+
+        <form id="catalogForm" name="catalogForm" action="https://fe.it-academy.by/TestForm.php" method="POST">
+            <div class="form-row">
+                <label for="developers">Разработчики:</label>
+                <input type="text" id="developers" name="developers">
+            </div>
+
+            <div class="form-row">
+                <label for="siteName">Название сайта:</label>
+                <input type="text" id="siteName" name="siteName">
+            </div>
+
+            <div class="form-row">
+                <label for="siteUrl">URL сайта:</label>
+                <input type="text" id="siteUrl" name="siteUrl">
+            </div>
+
+            <div class="form-row">
+                <label for="launchDate">Дата запуска сайта:</label>
+                <input type="date" id="launchDate" name="launchDate">
+            </div>
+
+            <div class="form-row">
+                <label for="visitors">Посетителей в сутки:</label>
+                <input type="text" id="visitors" name="visitors">
+            </div>
+
+            <div class="form-row">
+                <label for="email">E-mail для связи:</label>
+                <input type="email" id="email" name="email">
+            </div>
+
+            <div class="form-row">
+                <label for="category">Рубрика каталога:</label>
+                <select id="category" name="category">
+                    <option value="1">здоровье</option>
+                    <option value="2">домашний уют</option>
+                    <option value="3" selected>бытовая техника</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label>Размещение:</label>
+                <div class="radio-group">
+                    <input type="radio" id="free" name="placement" value="1">
+                    <label for="free">бесплатное</label>
+                    <input type="radio" id="paid" name="placement" value="2">
+                    <label for="paid">платное</label>
+                    <input type="radio" id="vip" name="placement" value="3">
+                    <label for="vip">VIP</label>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label for="allowReviews">Разрешить отзывы:</label>
+                <input type="checkbox" id="allowReviews" name="allowReviews">
+            </div>
+
+            <div class="form-row description-wrap">
+                <label for="description">Описание сайта:</label>
+                <textarea id="description" name="description"></textarea>
+            </div>
+
+            <div class="form-row">
+                <button type="submit" id="submitBtn">Опубликовать</button>
+            </div>
+        </form>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('catalogForm');
+            const fields = {
+                developers: form.querySelector('#developers'),
+                siteName: form.querySelector('#siteName'),
+                siteUrl: form.querySelector('#siteUrl'),
+                launchDate: form.querySelector('#launchDate'),
+                visitors: form.querySelector('#visitors'),
+                email: form.querySelector('#email'),
+                category: form.querySelector('#category'),
+                placement: form.querySelectorAll('input[name="placement"]'),
+                allowReviews: form.querySelector('#allowReviews'),
+                description: form.querySelector('#description'),
+            };
+
+
+            function showError(field, message) {
+                let anchorElement;
+
+                if (field.type === 'radio') {
+                    const groupWrapper = field.closest('.radio-group');
+                    groupWrapper.classList.add('group-error'); 
+                    anchorElement = groupWrapper;
+                } else {
+                    field.classList.add('input-error');
+                    anchorElement = field;
+                }
+
+                let errorElement = anchorElement.nextElementSibling;
+                if (!errorElement || !errorElement.classList.contains('error-text')) {
+                    errorElement = document.createElement('p');
+                    errorElement.className = 'error-text';
+                    anchorElement.after(errorElement);
+                }
+                errorElement.textContent = message;
+            }
+
+            function clearError(field) {
+                let anchorElement;
+
+                if (field.type === 'radio') {
+                    const groupWrapper = field.closest('.radio-group');
+                    groupWrapper.classList.remove('group-error'); 
+                    anchorElement = groupWrapper;
+                } else {
+
+                    field.classList.remove('input-error');
+                    anchorElement = field;
+                }
+
+                
+                let errorElement = anchorElement.nextElementSibling;
+                if (errorElement && errorElement.classList.contains('error-text')) {
+                    errorElement.remove();
+                }
+            }
+
+            function validateField(field) {
+                let isValid = true;
+                let errorMessage = '';
+                const value = field.value.trim();
+
+                switch (field.id) {
+                    case 'developers':
+                    case 'siteName':
+                    case 'description':
+                        if (value === '') {
+                            isValid = false;
+                            errorMessage = 'Поле не должно быть пустым';
+                        }
+                        break;
+                    case 'siteUrl':
+                        if (value === '') {
+                            isValid = false;
+                            errorMessage = 'Поле не должно быть пустым';
+                        } else if (!/^https?:\/\/.+\..+/.test(value)) {
+                            isValid = false;
+                            errorMessage = 'Введите корректный URL по типу https://test.site';
+                        }
+                        break;
+                    case 'launchDate':
+                        if (value === '') {
+                            isValid = false;
+                            errorMessage = 'Укажите дату';
+                        }
+                        break;
+                    case 'visitors':
+                        if (value === '') {
+                            isValid = false;
+                            errorMessage = 'Поле не должно быть пустым';
+                        } else if (!/^\d+$/.test(value)) {
+                            isValid = false;
+                            errorMessage = 'Введите число';
+                        }
+                        break;
+                    case 'email':
+                        if (value === '') {
+                            isValid = false;
+                            errorMessage = 'Поле не должно быть пустым';
+                        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                            isValid = false;
+                            errorMessage = 'Введите корректный E-mail';
+                        }
+                        break;
+                }
+
+                if (!isValid) {
+                    showError(field, errorMessage);
+                } else {
+                    clearError(field);
+                }
+                return isValid;
+            }
+
+            Object.values(fields).forEach(field => {
+                if (field instanceof NodeList) {
+                    field.forEach(radio => {
+                        radio.addEventListener('change', () => {
+                            clearError(radio);
+                        });
+                    });
+                } else if (field.type === 'checkbox' || field.tagName === 'SELECT') {
+                    field.addEventListener('change', () => validateField(field));
+                } else {
+                    field.addEventListener('blur', () => validateField(field));
+                }
+            });
+
+            // Обработчик отправки формы
+            form.addEventListener('submit', function (event) {
+                event.preventDefault(); // Отменяем стандартную отправку
+
+                let isFormValid = true;
+                let firstInvalidField = null;
+
+                // Валидируем все поля
+                Object.values(fields).forEach(fieldOrNodeList => {
+                    let currentFieldIsValid = true;
+                    if (fieldOrNodeList instanceof NodeList) {
+                        const isAnyChecked = Array.from(fieldOrNodeList).some(radio => radio.checked);
+                        if (!isAnyChecked) {
+                            currentFieldIsValid = false;
+                            showError(fieldOrNodeList[0], 'Выберите один из вариантов');
+
+                        } else {
+                            clearError(fieldOrNodeList[0]);
+                        }
+                    } else {
+                        currentFieldIsValid = validateField(fieldOrNodeList);
+                    }
+
+                    if (!currentFieldIsValid) {
+                        isFormValid = false;
+                        if (!firstInvalidField) {
+                            firstInvalidField = (fieldOrNodeList instanceof NodeList) ? fieldOrNodeList[0] : fieldOrNodeList;
+                        }
+                    }
+                });
+
+                if (isFormValid) {
+                    form.submit();
+                } else {
+                    if (firstInvalidField) {
+                        firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstInvalidField.focus();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

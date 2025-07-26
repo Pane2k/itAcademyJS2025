@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset=UTF-8>
+    <title>drag&amp;drop</title>
+</head>
+
+<body style='min-height: 100vh'>
+    <img src='http://fe.it-academy.by/Sites/0000007/sax.jpg'>
+    <img src='http://fe.it-academy.by/Sites/0000007/Yin_and_Yang.png' width=100 style='vertical-align: 20px'>
+    <img src='http://fe.it-academy.by/Sites/0000007/Man-and-woman.png' width=150>
+    <img src='http://fe.it-academy.by/Sites/0000007/No_smoking.png' style='padding-left: 50px'>
+
+    <script>
+        // здесь ваш код
+        const images = document.querySelectorAll('img')
+        let dragedImage = null
+        let offsetX, offsetY;
+
+
+        let zIndexObj = {}
+        const topZIndex = images.length - 1;
+
+        images.forEach((image,index) => {
+            const imageId = 'drag-img-' + index;
+            image.id = imageId;
+
+            image.style.position = 'absolute'
+            image.style.cursor = 'grab'
+
+            image.style.zIndex = index;
+            zIndexObj[imageId] = index;
+
+                
+            
+            image.addEventListener('mousedown', (eo)=>{
+                eo.preventDefault();
+                dragedImage = image
+
+                // Получаем координаты вместе со скролом
+                offsetX = eo.clientX - window.scrollX - image.getBoundingClientRect().left 
+                offsetY = eo.clientY - window.scrollY - image.getBoundingClientRect().top
+            
+                const oldZIndex = parseInt(dragedImage.style.zIndex)
+                if (oldZIndex === topZIndex) {
+                    dragedImage.style.cursor = 'grabbing'
+                    return
+                }
+                
+                // Делаем так чтобы z индекс был в порядке в котором мы трогали элементы
+                images.forEach(otherImage => {
+                    const currentZ = parseInt(otherImage.style.zIndex)
+                    if (currentZ > oldZIndex) {
+                        otherImage.style.zIndex = currentZ - 1
+                    }
+                });
+                dragedImage.style.zIndex = topZIndex
+                images.forEach(img => {
+                    zIndexObj[img.id] = parseInt(img.style.zIndex)
+                });
+
+                console.log(zIndexObj)
+                
+                image.style.cursor = 'grabbing'
+            }, false)
+            
+        });
+
+        document.addEventListener('mouseup', (eo) => {
+            if(dragedImage){
+                dragedImage.style.cursor = 'grab'
+                dragedImage = null
+            }
+        }, false)
+
+        document.addEventListener('mousemove', (eo) => {
+            if(dragedImage){
+                dragedImage.style.left = (eo.clientX - offsetX) + 'px'
+                dragedImage.style.top = (eo.clientY - offsetY) + 'px'
+            }
+        }, false)
+    </script>
+
+</body>
+
+</html>
