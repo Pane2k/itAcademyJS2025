@@ -14,72 +14,87 @@
 
     <script>
         // здесь ваш код
-        const images = document.querySelectorAll('img')
-        let dragedImage = null
-        let offsetX, offsetY;
+        document.addEventListener('DOMContentLoaded', function () {
+            const images = document.querySelectorAll('img')
 
+            let draggedImage = null
+            let startX, startY
 
-        let zIndexObj = {}
-        const topZIndex = images.length - 1;
+            const imageTransforms = {};
+            const topZIndex = images.length - 1
 
-        images.forEach((image,index) => {
-            const imageId = 'drag-img-' + index;
-            image.id = imageId;
+            images.forEach((image, index) => {
+                const imageId = 'drag-img-' + index
+                image.id = imageId
 
-            image.style.position = 'absolute'
-            image.style.cursor = 'grab'
+                imageTransforms[imageId] = { x: 0, y: 0 }
 
-            image.style.zIndex = index;
-            zIndexObj[imageId] = index;
+                image.style.position = 'relative'
+                image.style.cursor = 'grab'
+                image.style.zIndex = index;
 
-                
-            
-            image.addEventListener('mousedown', (eo)=>{
-                eo.preventDefault();
-                dragedImage = image
+                image.style.transform = 'translate(0px, 0px)';
 
-                // Получаем координаты вместе со скролом
-                offsetX = eo.clientX - window.scrollX - image.getBoundingClientRect().left 
-                offsetY = eo.clientY - window.scrollY - image.getBoundingClientRect().top
-            
-                const oldZIndex = parseInt(dragedImage.style.zIndex)
-                if (oldZIndex === topZIndex) {
-                    dragedImage.style.cursor = 'grabbing'
-                    return
+                image.addEventListener('mousedown', (eo) => {
+                    eo.preventDefault()
+                    draggedImage = image
+
+                    startX = eo.clientX
+                    startY = eo.clientY
+                    
+                    const oldZIndex = parseInt(draggedImage.style.zIndex)
+                    if (oldZIndex === topZIndex) {
+                        draggedImage.style.cursor = 'grabbing'
+                        return
+                    }
+
+                    images.forEach(otherImage => {
+                        const currentZ = parseInt(otherImage.style.zIndex)
+                        if (currentZ > oldZIndex) {
+                            otherImage.style.zIndex = currentZ - 1
+                        }
+                    });
+
+                    draggedImage.style.zIndex = topZIndex
+                    image.style.cursor = 'grabbing'
+
+                }, false);
+
+            });
+
+            document.addEventListener('mouseup', (eo) => {
+                if (draggedImage) {
+                    const deltaX = eo.clientX - startX;
+                    const deltaY = eo.clientY - startY;
+
+                    const currentTransform = imageTransforms[draggedImage.id];
+
+                    currentTransform.x += deltaX;
+                    currentTransform.y += deltaY;
+
+                    draggedImage.style.cursor = 'grab';
+                    draggedImage = null;
+                }
+
+            }, false);
+
+            document.addEventListener('mousemove', (eo) => {
+                if (draggedImage) {
+                    eo.preventDefault()
+
+                    const deltaX = eo.clientX - startX
+                    const deltaY = eo.clientY - startY
+
+                    const currentTransform = imageTransforms[draggedImage.id]
+
+                    const newX = currentTransform.x + deltaX
+                    const newY = currentTransform.y + deltaY
+
+                    draggedImage.style.transform = `translate(${newX}px, ${newY}px)`
                 }
                 
-                // Делаем так чтобы z индекс был в порядке в котором мы трогали элементы
-                images.forEach(otherImage => {
-                    const currentZ = parseInt(otherImage.style.zIndex)
-                    if (currentZ > oldZIndex) {
-                        otherImage.style.zIndex = currentZ - 1
-                    }
-                });
-                dragedImage.style.zIndex = topZIndex
-                images.forEach(img => {
-                    zIndexObj[img.id] = parseInt(img.style.zIndex)
-                });
-
-                console.log(zIndexObj)
-                
-                image.style.cursor = 'grabbing'
-            }, false)
-            
+            }, false);
         });
-
-        document.addEventListener('mouseup', (eo) => {
-            if(dragedImage){
-                dragedImage.style.cursor = 'grab'
-                dragedImage = null
-            }
-        }, false)
-
-        document.addEventListener('mousemove', (eo) => {
-            if(dragedImage){
-                dragedImage.style.left = (eo.clientX - offsetX) + 'px'
-                dragedImage.style.top = (eo.clientY - offsetY) + 'px'
-            }
-        }, false)
     </script>
 
 </body>

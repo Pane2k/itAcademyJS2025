@@ -170,6 +170,10 @@
                 allowReviews: form.querySelector('#allowReviews'),
                 description: form.querySelector('#description'),
             };
+            let firstTimeClickOnReview = true
+
+            fields.category.selectedIndex = -1
+
 
 
             function showError(field, message) {
@@ -195,12 +199,17 @@
 
             function clearError(field) {
                 let anchorElement;
-
                 if (field.type === 'radio') {
                     const groupWrapper = field.closest('.radio-group');
                     groupWrapper.classList.remove('group-error'); 
                     anchorElement = groupWrapper;
-                } else {
+                }
+                else if (field.type === 'checkbox'){
+                    firstTimeClickOnReview = false
+                    field.classList.remove('input-error');
+                    anchorElement = field;
+                }
+                else {
 
                     field.classList.remove('input-error');
                     anchorElement = field;
@@ -260,6 +269,18 @@
                             errorMessage = 'Введите корректный E-mail';
                         }
                         break;
+                    case 'category':
+                        if (value === '') {
+                            isValid = false;
+                            errorMessage = 'Выберите рубрику';
+                        }
+                        break;
+                    case 'allowReviews':
+                        if(firstTimeClickOnReview){
+                            
+                            isValid = false;
+                            errorMessage = 'Подтверждение ввода, если хотите без отзывов кликните 2 раза';
+                        }
                 }
 
                 if (!isValid) {
@@ -269,6 +290,23 @@
                 }
                 return isValid;
             }
+            function validateRadio(field){
+                if (field instanceof NodeList) {
+                    const isAnyChecked = Array.from(field).some(radio => radio.checked);
+                    if (!isAnyChecked) {
+                        showError(field[0], 'Выберите один из вариантов');
+                        return false;
+                        
+
+                    } else {
+                        clearError(field[0]);
+                    }
+                }
+                else {
+                    return validateField(field);
+                }
+                return true
+            }
 
             Object.values(fields).forEach(field => {
                 if (field instanceof NodeList) {
@@ -276,36 +314,32 @@
                         radio.addEventListener('change', () => {
                             clearError(radio);
                         });
+                        
                     });
-                } else if (field.type === 'checkbox' || field.tagName === 'SELECT') {
+                } else if (field.type === 'checkbox' ) {
+                    
+                    field.addEventListener('change', () => {firstTimeClickOnReview = false; validateField(field); });
+                    validateField(field)
+                } else if (field.tagName === 'SELECT'){
                     field.addEventListener('change', () => validateField(field));
-                } else {
+                    validateField(field)
+                } 
+                else {
                     field.addEventListener('blur', () => validateField(field));
+                    validateField(field)
                 }
+                validateRadio(field)
             });
 
-            // Обработчик отправки формы
             form.addEventListener('submit', function (event) {
-                event.preventDefault(); // Отменяем стандартную отправку
+                event.preventDefault();
 
                 let isFormValid = true;
                 let firstInvalidField = null;
 
-                // Валидируем все поля
                 Object.values(fields).forEach(fieldOrNodeList => {
                     let currentFieldIsValid = true;
-                    if (fieldOrNodeList instanceof NodeList) {
-                        const isAnyChecked = Array.from(fieldOrNodeList).some(radio => radio.checked);
-                        if (!isAnyChecked) {
-                            currentFieldIsValid = false;
-                            showError(fieldOrNodeList[0], 'Выберите один из вариантов');
-
-                        } else {
-                            clearError(fieldOrNodeList[0]);
-                        }
-                    } else {
-                        currentFieldIsValid = validateField(fieldOrNodeList);
-                    }
+                    currentFieldIsValid = validateRadio(fieldOrNodeList)
 
                     if (!currentFieldIsValid) {
                         isFormValid = false;
@@ -324,6 +358,7 @@
                     }
                 }
             });
+            
         });
     </script>
 </body>
