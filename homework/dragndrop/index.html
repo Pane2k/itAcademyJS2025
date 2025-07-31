@@ -21,22 +21,23 @@
             let newX, newY
 
             const topZIndex = images.length - 1
-            const initialPositions = [];
+            const initialPositions = []
+
             images.forEach(image => {
-                const rect = image.getBoundingClientRect();
+                const rect = image.getBoundingClientRect()
                 initialPositions.push({
-                    left: rect.left,
-                    top:  rect.top 
+                    left: rect.left + window.scrollX,
+                    top:  rect.top + window.scrollY
                 })
             });
 
             images.forEach((image, index) => {
                 image.style.position = 'absolute'
                 image.style.cursor   = 'grab'
-                image.style.zIndex   = index;
+                image.style.zIndex   = index
 
-                image.style.left = initialPositions[index].left + 'px';
-                image.style.top = initialPositions[index].top + 'px';
+                image.style.left = initialPositions[index].left + 'px'
+                image.style.top = initialPositions[index].top + 'px'
 
                 image.addEventListener('mousedown', (eo) => {
                     eo.preventDefault()
@@ -56,7 +57,7 @@
                         if (currentZ > oldZIndex) {
                             otherImage.style.zIndex = currentZ - 1
                         }
-                    });
+                    })
 
                     draggedImage.style.zIndex = topZIndex
                     image.style.cursor = 'grabbing'
@@ -69,8 +70,8 @@
                 if (draggedImage) {
                     //eo.preventDefault()
                     
-                    draggedImage.style.cursor = 'grab';
-                    draggedImage = null;
+                    draggedImage.style.cursor = 'grab'
+                    draggedImage = null
                 }
 
             }, false);
