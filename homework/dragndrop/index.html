@@ -14,33 +14,36 @@
 
     <script>
         // здесь ваш код
-        document.addEventListener('DOMContentLoaded', function () {
+        window.addEventListener('load', function () {
             const images = document.querySelectorAll('img')
 
             let draggedImage = null
-            let startX, startY
+            let newX, newY
 
-            const imageTransforms = {};
             const topZIndex = images.length - 1
+            const initialPositions = [];
+            images.forEach(image => {
+                const rect = image.getBoundingClientRect();
+                initialPositions.push({
+                    left: rect.left,
+                    top:  rect.top 
+                })
+            });
 
             images.forEach((image, index) => {
-                const imageId = 'drag-img-' + index
-                image.id = imageId
+                image.style.position = 'absolute'
+                image.style.cursor   = 'grab'
+                image.style.zIndex   = index;
 
-                imageTransforms[imageId] = { x: 0, y: 0 }
-
-                image.style.position = 'relative'
-                image.style.cursor = 'grab'
-                image.style.zIndex = index;
-
-                image.style.transform = 'translate(0px, 0px)';
+                image.style.left = initialPositions[index].left + 'px';
+                image.style.top = initialPositions[index].top + 'px';
 
                 image.addEventListener('mousedown', (eo) => {
                     eo.preventDefault()
                     draggedImage = image
 
-                    startX = eo.clientX
-                    startY = eo.clientY
+                    newX = eo.pageX - parseFloat(draggedImage.style.left)
+                    newY = eo.pageY - parseFloat(draggedImage.style.top)
                     
                     const oldZIndex = parseInt(draggedImage.style.zIndex)
                     if (oldZIndex === topZIndex) {
@@ -64,14 +67,8 @@
 
             document.addEventListener('mouseup', (eo) => {
                 if (draggedImage) {
-                    const deltaX = eo.clientX - startX;
-                    const deltaY = eo.clientY - startY;
-
-                    const currentTransform = imageTransforms[draggedImage.id];
-
-                    currentTransform.x += deltaX;
-                    currentTransform.y += deltaY;
-
+                    //eo.preventDefault()
+                    
                     draggedImage.style.cursor = 'grab';
                     draggedImage = null;
                 }
@@ -82,15 +79,8 @@
                 if (draggedImage) {
                     eo.preventDefault()
 
-                    const deltaX = eo.clientX - startX
-                    const deltaY = eo.clientY - startY
-
-                    const currentTransform = imageTransforms[draggedImage.id]
-
-                    const newX = currentTransform.x + deltaX
-                    const newY = currentTransform.y + deltaY
-
-                    draggedImage.style.transform = `translate(${newX}px, ${newY}px)`
+                    draggedImage.style.left = `${eo.pageX - newX}px`
+                    draggedImage.style.top  = `${eo.pageY - newY}px`
                 }
                 
             }, false);
