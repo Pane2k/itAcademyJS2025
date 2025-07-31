@@ -155,212 +155,207 @@
             </div>
         </form>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('catalogForm');
-            const fields = {
-                developers: form.querySelector('#developers'),
-                siteName: form.querySelector('#siteName'),
-                siteUrl: form.querySelector('#siteUrl'),
-                launchDate: form.querySelector('#launchDate'),
-                visitors: form.querySelector('#visitors'),
-                email: form.querySelector('#email'),
-                category: form.querySelector('#category'),
-                placement: form.querySelectorAll('input[name="placement"]'),
-                allowReviews: form.querySelector('#allowReviews'),
-                description: form.querySelector('#description'),
-            };
-            let firstTimeClickOnReview = true
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('catalogForm')
+        const fields = {
+            developers: form.querySelector('#developers'),
+            siteName: form.querySelector('#siteName'),
+            siteUrl: form.querySelector('#siteUrl'),
+            launchDate: form.querySelector('#launchDate'),
+            visitors: form.querySelector('#visitors'),
+            email: form.querySelector('#email'),
+            category: form.querySelector('#category'),
+            placement: form.querySelectorAll('input[name="placement"]'),
+            allowReviews: form.querySelector('#allowReviews'),
+            description: form.querySelector('#description'),
+        }
 
-            fields.category.selectedIndex = -1
+        let firstTimeClickOnReview = true
+
+        fields.category.selectedIndex = -1
 
 
 
-            function showError(field, message) {
-                let anchorElement;
+        function showError(field, message) {
+            let anchorElement
 
-                if (field.type === 'radio') {
-                    const groupWrapper = field.closest('.radio-group');
-                    groupWrapper.classList.add('group-error'); 
-                    anchorElement = groupWrapper;
-                } else {
-                    field.classList.add('input-error');
-                    anchorElement = field;
-                }
-
-                let errorElement = anchorElement.nextElementSibling;
-                if (!errorElement || !errorElement.classList.contains('error-text')) {
-                    errorElement = document.createElement('p');
-                    errorElement.className = 'error-text';
-                    anchorElement.after(errorElement);
-                }
-                errorElement.textContent = message;
+            if (field.type === 'radio') {
+                const groupWrapper = field.closest('.radio-group')
+                groupWrapper.classList.add('group-error')
+                anchorElement = groupWrapper
+            } else {
+                field.classList.add('input-error')
+                anchorElement = field
             }
 
-            function clearError(field) {
-                let anchorElement;
-                if (field.type === 'radio') {
-                    const groupWrapper = field.closest('.radio-group');
-                    groupWrapper.classList.remove('group-error'); 
-                    anchorElement = groupWrapper;
-                }
-                else if (field.type === 'checkbox'){
-                    firstTimeClickOnReview = false
-                    field.classList.remove('input-error');
-                    anchorElement = field;
-                }
-                else {
+            let errorElement = anchorElement.nextElementSibling
+            if (!errorElement || !errorElement.classList.contains('error-text')) {
+                errorElement = document.createElement('p')
+                errorElement.className = 'error-text'
+                anchorElement.after(errorElement)
+            }
+            errorElement.textContent = message
+        }
 
-                    field.classList.remove('input-error');
-                    anchorElement = field;
-                }
+        function clearError(field) {
+            let anchorElement
+            if (field.type === 'radio') {
+                const groupWrapper = field.closest('.radio-group')
+                groupWrapper.classList.remove('group-error')
+                anchorElement = groupWrapper
+            }
+            else if (field.type === 'checkbox'){
+                firstTimeClickOnReview = false
+                field.classList.remove('input-error')
+                anchorElement = field
+            }
+            else {
 
-                
-                let errorElement = anchorElement.nextElementSibling;
-                if (errorElement && errorElement.classList.contains('error-text')) {
-                    errorElement.remove();
-                }
+                field.classList.remove('input-error')
+                anchorElement = field
             }
 
-            function validateField(field) {
-                let isValid = true;
-                let errorMessage = '';
-                const value = field.value.trim();
-
-                switch (field.id) {
-                    case 'developers':
-                    case 'siteName':
-                    case 'description':
-                        if (value === '') {
-                            isValid = false;
-                            errorMessage = 'Поле не должно быть пустым';
-                        }
-                        break;
-                    case 'siteUrl':
-                        if (value === '') {
-                            isValid = false;
-                            errorMessage = 'Поле не должно быть пустым';
-                        } else if (!/^https?:\/\/.+\..+/.test(value)) {
-                            isValid = false;
-                            errorMessage = 'Введите корректный URL по типу https://test.site';
-                        }
-                        break;
-                    case 'launchDate':
-                        if (value === '') {
-                            isValid = false;
-                            errorMessage = 'Укажите дату';
-                        }
-                        break;
-                    case 'visitors':
-                        if (value === '') {
-                            isValid = false;
-                            errorMessage = 'Поле не должно быть пустым';
-                        } else if (!/^\d+$/.test(value)) {
-                            isValid = false;
-                            errorMessage = 'Введите число';
-                        }
-                        break;
-                    case 'email':
-                        if (value === '') {
-                            isValid = false;
-                            errorMessage = 'Поле не должно быть пустым';
-                        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-                            isValid = false;
-                            errorMessage = 'Введите корректный E-mail';
-                        }
-                        break;
-                    case 'category':
-                        if (value === '') {
-                            isValid = false;
-                            errorMessage = 'Выберите рубрику';
-                        }
-                        break;
-                    case 'allowReviews':
-                        if(firstTimeClickOnReview){
-                            
-                            isValid = false;
-                            errorMessage = 'Подтверждение ввода, если хотите без отзывов кликните 2 раза';
-                        }
-                }
-
-                if (!isValid) {
-                    showError(field, errorMessage);
-                } else {
-                    clearError(field);
-                }
-                return isValid;
-            }
-            function validateRadio(field){
-                if (field instanceof NodeList) {
-                    const isAnyChecked = Array.from(field).some(radio => radio.checked);
-                    if (!isAnyChecked) {
-                        showError(field[0], 'Выберите один из вариантов');
-                        return false;
-                        
-
-                    } else {
-                        clearError(field[0]);
-                    }
-                }
-                else {
-                    return validateField(field);
-                }
-                return true
-            }
-
-            Object.values(fields).forEach(field => {
-                if (field instanceof NodeList) {
-                    field.forEach(radio => {
-                        radio.addEventListener('change', () => {
-                            clearError(radio);
-                        });
-                        
-                    });
-                } else if (field.type === 'checkbox' ) {
-                    
-                    field.addEventListener('change', () => {firstTimeClickOnReview = false; validateField(field); });
-                    validateField(field)
-                } else if (field.tagName === 'SELECT'){
-                    field.addEventListener('change', () => validateField(field));
-                    validateField(field)
-                } 
-                else {
-                    field.addEventListener('blur', () => validateField(field));
-                    validateField(field)
-                }
-                validateRadio(field)
-            });
-
-            form.addEventListener('submit', function (event) {
-                event.preventDefault();
-
-                let isFormValid = true;
-                let firstInvalidField = null;
-
-                Object.values(fields).forEach(fieldOrNodeList => {
-                    let currentFieldIsValid = true;
-                    currentFieldIsValid = validateRadio(fieldOrNodeList)
-
-                    if (!currentFieldIsValid) {
-                        isFormValid = false;
-                        if (!firstInvalidField) {
-                            firstInvalidField = (fieldOrNodeList instanceof NodeList) ? fieldOrNodeList[0] : fieldOrNodeList;
-                        }
-                    }
-                });
-
-                if (isFormValid) {
-                    form.submit();
-                } else {
-                    if (firstInvalidField) {
-                        firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        firstInvalidField.focus();
-                    }
-                }
-            });
             
-        });
-    </script>
+            let errorElement = anchorElement.nextElementSibling
+            if (errorElement && errorElement.classList.contains('error-text')) {
+                errorElement.remove()
+            }
+        }
+
+        function validateField(field) {
+            let isValid = true
+            let errorMessage = ''
+            const value = field.value.trim()
+
+            switch (field.id) {
+                case 'developers':
+                case 'siteName':
+                case 'description':
+                    if (value === '') {
+                        isValid = false
+                        errorMessage = 'Поле не должно быть пустым'
+                    }
+                    break
+                case 'siteUrl':
+                    if (value === '') {
+                        isValid = false
+                        errorMessage = 'Поле не должно быть пустым'
+                    } else if (!/^https?:\/\/.+\..+/.test(value)) {
+                        isValid = false
+                        errorMessage = 'Введите корректный URL по типу https://test.site'
+                    }
+                    break
+                case 'launchDate':
+                    if (value === '') {
+                        isValid = false
+                        errorMessage = 'Укажите дату'
+                    }
+                    break
+                case 'visitors':
+                    if (value === '') {
+                        isValid = false
+                        errorMessage = 'Введите число'
+                    } else if (!/^\d+$/.test(value)) {
+                        isValid = false
+                        errorMessage = 'Введите целое число'
+                    }
+                    break
+                case 'email':
+                    if (value === '') {
+                        isValid = false
+                        errorMessage = 'Поле не должно быть пустым'
+                    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                        isValid = false
+                        errorMessage = 'Введите корректный E-mail'
+                    }
+                    break
+                case 'category':
+                    if (value === '') {
+                        isValid = false
+                        errorMessage = 'Выберите рубрику'
+                    }
+                    break
+                case 'allowReviews':
+                    if(firstTimeClickOnReview){
+                        isValid = false
+                        errorMessage = 'Подтверждение ввода, если хотите без отзывов кликните 2 раза'
+                    }
+            }
+
+            if (!isValid) {
+                showError(field, errorMessage)
+            } else {
+                clearError(field)
+            }
+            return isValid
+        }
+
+        function validateRadio(field){
+            if (field instanceof NodeList) {
+                const isAnyChecked = Array.from(field).some(radio => radio.checked)
+                if (!isAnyChecked) {
+                    showError(field[0], 'Выберите один из вариантов')
+                    return false
+                } else {
+                    clearError(field[0])
+                }
+            }
+            else {
+                return validateField(field)
+            }
+            return true
+        }
+
+        Object.values(fields).forEach(field => {
+            if (field instanceof NodeList) {
+                field.forEach(radio => {
+                    radio.addEventListener('change', () => {
+                        clearError(radio)
+                    })
+                })
+            } else if (field.type === 'checkbox') {
+                field.addEventListener('change', () => {
+                    firstTimeClickOnReview = false
+                    validateField(field)
+                })
+            } else if (field.tagName === 'SELECT'){
+                field.addEventListener('change', () => validateField(field))
+            } 
+            else {
+                field.addEventListener('blur', () => validateField(field))
+            }
+            // validateRadio(field)
+        })
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault()
+
+            let isFormValid = true
+            let firstInvalidField = null
+
+            Object.values(fields).forEach(fieldOrNodeList => {
+                const currentFieldIsValid = validateRadio(fieldOrNodeList)
+
+                if (!currentFieldIsValid && isFormValid) {
+                    isFormValid = false
+                    if (!firstInvalidField) {
+                        firstInvalidField = (fieldOrNodeList instanceof NodeList) ? fieldOrNodeList[0] : fieldOrNodeList
+                    }
+                }
+            })
+
+            if (isFormValid) {
+                form.submit()
+            } else {
+                if (firstInvalidField) {
+                    firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    firstInvalidField.focus()
+                }
+            }
+        })
+    })
+</script>
 </body>
 
 </html>
