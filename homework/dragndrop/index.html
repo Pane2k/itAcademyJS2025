@@ -20,7 +20,7 @@
             let draggedImage = null
             let newX, newY
 
-            const topZIndex = images.length - 1
+            let topZIndex = images.length - 1
             const initialPositions = []
 
             images.forEach(image => {
@@ -53,25 +53,40 @@
                     eo.preventDefault()
                     draggedImage = image
                     
-                    image.addEventListener('mousemove', mouseMoveHandler, false);
+
+                    // FIX: 1
+                    // Замена привязки слушателя обратно на document 
+                    // При привязке к объекту, а не документу происходит чтение перемещения
+                    // только при нахождении курсора на изображении и изза этого происходит
+                    // проблема с резким движением 
+                    document.addEventListener('mousemove', mouseMoveHandler, false); 
                     
                     newX = eo.pageX - parseFloat(draggedImage.style.left)
                     newY = eo.pageY - parseFloat(draggedImage.style.top)
 
-                    const oldZIndex = parseInt(draggedImage.style.zIndex)
-                    if (oldZIndex === topZIndex) {
-                        draggedImage.style.cursor = 'grabbing'
-                        return
+                    // const oldZIndex = parseInt(draggedImage.style.zIndex)
+                    // if (oldZIndex === topZIndex) {
+                    //     draggedImage.style.cursor = 'grabbing'
+                    //     return
+                    // }
+                    // images.forEach(otherImage => {
+                    //     const currentZ = parseInt(otherImage.style.zIndex)
+                    //     if (currentZ > oldZIndex) {
+                    //         otherImage.style.zIndex = currentZ - 1
+                    //     }
+                    // })
+                    // draggedImage.style.zIndex = topZIndex
+                    
+
+                    // FIX: 2
+                    // Вместо переставления z индекса между объектами мы каждый раз
+                    // добавляем к переменной topZIndex единицу и присваиваем это к
+                    // объекту изображения. Из-за этого есть теоритическая вероятность
+                    // переполнения переменной
+                    if(Number(image.style.zIndex) !== topZIndex){
+                        topZIndex += 1
+                        image.style.zIndex = topZIndex 
                     }
-
-                    images.forEach(otherImage => {
-                        const currentZ = parseInt(otherImage.style.zIndex)
-                        if (currentZ > oldZIndex) {
-                            otherImage.style.zIndex = currentZ - 1
-                        }
-                    })
-
-                    draggedImage.style.zIndex = topZIndex
                     image.style.cursor = 'grabbing'
                 }, false);
             });
@@ -79,7 +94,10 @@
             document.addEventListener('mouseup', (eo) => {
                 if (draggedImage) {
                     //eo.preventDefault()
-                    draggedImage.removeEventListener('mousemove', mouseMoveHandler)
+
+                    // FIX: 1
+                    // Замена с draggedImage на document
+                    document.removeEventListener('mousemove', mouseMoveHandler)
                     draggedImage.style.cursor = 'grab'
                     draggedImage = null
                 }
