@@ -31,6 +31,16 @@
                 })
             });
 
+            const mouseMoveHandler = (eo) => {
+                    console.log('moved')
+                    if (draggedImage) {
+                        eo.preventDefault()
+
+                        draggedImage.style.left = `${eo.pageX - newX}px`
+                        draggedImage.style.top = `${eo.pageY - newY}px`
+                    }
+                }
+
             images.forEach((image, index) => {
                 image.style.position = 'absolute'
                 image.style.cursor = 'grab'
@@ -42,7 +52,9 @@
                 image.addEventListener('mousedown', (eo) => {
                     eo.preventDefault()
                     draggedImage = image
-
+                    
+                    image.addEventListener('mousemove', mouseMoveHandler, false);
+                    
                     newX = eo.pageX - parseFloat(draggedImage.style.left)
                     newY = eo.pageY - parseFloat(draggedImage.style.top)
 
@@ -61,24 +73,13 @@
 
                     draggedImage.style.zIndex = topZIndex
                     image.style.cursor = 'grabbing'
-
-                }, false);
-
-                image.addEventListener('mousemove', (eo) => {
-                    if (draggedImage) {
-                        eo.preventDefault()
-
-                        draggedImage.style.left = `${eo.pageX - newX}px`
-                        draggedImage.style.top = `${eo.pageY - newY}px`
-                    }
-
                 }, false);
             });
 
             document.addEventListener('mouseup', (eo) => {
                 if (draggedImage) {
                     //eo.preventDefault()
-
+                    draggedImage.removeEventListener('mousemove', mouseMoveHandler)
                     draggedImage.style.cursor = 'grab'
                     draggedImage = null
                 }
