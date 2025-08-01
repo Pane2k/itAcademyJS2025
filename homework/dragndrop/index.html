@@ -27,14 +27,14 @@
                 const rect = image.getBoundingClientRect()
                 initialPositions.push({
                     left: rect.left + window.scrollX,
-                    top:  rect.top + window.scrollY
+                    top: rect.top + window.scrollY
                 })
             });
 
             images.forEach((image, index) => {
                 image.style.position = 'absolute'
-                image.style.cursor   = 'grab'
-                image.style.zIndex   = index
+                image.style.cursor = 'grab'
+                image.style.zIndex = index
 
                 image.style.left = initialPositions[index].left + 'px'
                 image.style.top = initialPositions[index].top + 'px'
@@ -45,7 +45,7 @@
 
                     newX = eo.pageX - parseFloat(draggedImage.style.left)
                     newY = eo.pageY - parseFloat(draggedImage.style.top)
-                    
+
                     const oldZIndex = parseInt(draggedImage.style.zIndex)
                     if (oldZIndex === topZIndex) {
                         draggedImage.style.cursor = 'grabbing'
@@ -64,26 +64,25 @@
 
                 }, false);
 
+                image.addEventListener('mousemove', (eo) => {
+                    if (draggedImage) {
+                        eo.preventDefault()
+
+                        draggedImage.style.left = `${eo.pageX - newX}px`
+                        draggedImage.style.top = `${eo.pageY - newY}px`
+                    }
+
+                }, false);
             });
 
             document.addEventListener('mouseup', (eo) => {
                 if (draggedImage) {
                     //eo.preventDefault()
-                    
+
                     draggedImage.style.cursor = 'grab'
                     draggedImage = null
                 }
 
-            }, false);
-
-            document.addEventListener('mousemove', (eo) => {
-                if (draggedImage) {
-                    eo.preventDefault()
-
-                    draggedImage.style.left = `${eo.pageX - newX}px`
-                    draggedImage.style.top  = `${eo.pageY - newY}px`
-                }
-                
             }, false);
         });
     </script>
