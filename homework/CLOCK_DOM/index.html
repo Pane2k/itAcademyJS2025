@@ -89,20 +89,13 @@
             transform-origin: 50% 500%;
         }
 
-        .hourLabel::after {
-            position: absolute;
-            content: "";
-            display: block;
-            width: 1px;
-            height: 3px;
-            background-color: black;
-            bottom: 0;
-            border-radius: 50%;
-        }
+        
 
         #clockContainer {
             font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
         }
+
+        
     </style>
 </head>
 
@@ -119,23 +112,41 @@
 
         class Clocks {
             constructor(diametr, container) {
+
+                // НАСТРОЙКА ЧАСОВ
                 this.diametr = diametr
                 this.container = container
                 this.clockBg = null
                 this.clockInterval = null
                 this.clockDigitalText = null
 
-                this.hoursInClock = 12
-                this.degPerHour = 360 / this.hoursInClock
-                this.procentOfLabel = 0.07
-                this.hoursLabelRadiusProcent = 15 * this.procentOfLabel * this.hoursInClock // Выверенный размер для циферблата
-                this.handSizes = {
-                    hourHand: 1 / 2,
-                    minuteHand: 3 / 4,
-                    secondHand: 9 / 10
-                }
-                this.paddingAroudClock = this.diametr / 20
+                // Установка времени
+                this.hoursInClock = 12   // Показатель сколько часов должно быть на циферблате
+                this.minutesInClock = 60 // Показатель сколько минут должно быть на циферблате
+                this.secondsInClock = 60 // Показатель сколько секунд должно быть на циферблате
+                
+                // Преобразование в 1 градус, для установки угла в часах
+                this.degPerHour   = 360 / this.hoursInClock   
+                this.degPerMinute = 360 / this.minutesInClock    
+                this.degPerSecond = 360 / this.secondsInClock
 
+
+                this.procentOfLabel = 7 / 100 // Подстроичное значение для размера круга в процентах
+                this.hoursLabelRadiusProcent = 15 * this.procentOfLabel * this.hoursInClock // Выверенный размер для циферблата
+                this.handSizes = {       // Размер стрелок часов
+                    hourHand: 1 / 2,     // Часовая стрелка
+                    hourHandOffset: -10,   // Смещение центра вращения часовой стрелки на процет
+                    minuteHand: 3 / 4,   // Минутная стрелка
+                    minuteHandOffset: -10, // Смещение центра вращения минутной стрелки на процет
+                    secondHand: 10 / 10,   // Секундная стрелка
+                    secondHandOffset: -20 // Смещение центра вращения секундной стрелки на процет 
+                }
+
+                this.paddingAroudClock = this.diametr / 20 // Создание отсупа для цифр
+
+                this.clockDigitalTextTopRatio = 4 // Позизция цифровых часов относительно диаметра
+
+                // Создаем элементы часов и ставим на таймер
                 this.createClockElements()
                 this.applySizes()
                 this.addClocks()
@@ -155,7 +166,7 @@
                 clockHandsContainer.id = 'clockHandsContainer'
 
                 this.clockHands = {
-                    hourHand: document.createElement('div'),
+                    hourHand:   document.createElement('div'),
                     minuteHand: document.createElement('div'),
                     secondHand: document.createElement('div')
                 }
@@ -165,14 +176,17 @@
 
                 this.clockDigitalText = document.createElement('p')
                 this.clockDigitalText.id = 'clockDigitalText'
-                this.clockDigitalText.innerHTML = 'Hello'
+                this.clockDigitalText.innerHTML = '00:00:00'
                 this.clockDigitalText.style.position = 'absolute'
                 this.clockDigitalText.style.textAlign = 'center'
 
-                this.clockDigitalText.style.top = `${this.diametr / 4}px`
+                this.clockDigitalText.style.top = `${this.diametr / this.clockDigitalTextTopRatio}px`
                 this.clockDigitalText.style.left = `0px`
                 this.clockDigitalText.style.width = `100%`
-
+                
+                this.clockDigitalText.style.color = `blue`
+                this.clockDigitalText.style.fontFamily = "'Courier New', 'Roboto Mono', 'Source Code Pro', 'Ubuntu Mono', 'Droid Sans Mono', monospace"
+                this.clockDigitalText.style.fontWeight = 'bold'
 
 
                 clockHandsContainer.append(this.clockHands.hourHand, this.clockHands.minuteHand, this.clockHands.secondHand)
@@ -208,13 +222,13 @@
 
                     const radius = this.diametr * this.hoursLabelRadiusProcent / 100
                     const labelsPathRadius = (this.diametr / 2) - this.paddingAroudClock
-                    let magicValue = (labelsPathRadius / radius) * 100
+                    let transformOriginY = (labelsPathRadius / radius) * 100
 
                     element.style.width = radius + 'px'
                     element.style.height = radius + 'px'
                     element.style.left = '50%'
                     element.style.top = '0px'
-                    element.style.transformOrigin = `50% ${magicValue}%`
+                    element.style.transformOrigin = `50% ${transformOriginY}%`
                     element.style.transform = `translate(-50%, ${this.paddingAroudClock}px) rotate(${this.degPerHour * i}deg)`
 
                     this.clockHoursLabelContainer.appendChild(element)
@@ -224,26 +238,39 @@
             setHands() {
                 let time = new Date()
                 console.log(time)
-                const hourHand = this.clockHands.hourHand
-                const minuteHand = this.clockHands.minuteHand
-                const secondHand = this.clockHands.secondHand
 
-                let hours = time.getHours()
+                let hours   = time.getHours()
                 let minutes = time.getMinutes()
                 let seconds = time.getSeconds()
 
-                const hourForClock = hours % this.hoursInClock
-                const hourAngle = (hourForClock * this.degPerHour) + (minutes / 60) * this.degPerHour
-                const minuteAngle = (minutes / 60) * 360 + (seconds / 60) * (360 / 60)
-                const secondAngle = (seconds / 60) * 360
+                const hourHand   = this.clockHands.hourHand
+                const minuteHand = this.clockHands.minuteHand
+                const secondHand = this.clockHands.secondHand
 
-                hourHand.style.transform = `rotate(${hourAngle}deg) translate(-50%, -10%)`
-                minuteHand.style.transform = `rotate(${minuteAngle}deg) translate(-50%, -10%)`
-                secondHand.style.transform = `rotate(${secondAngle}deg) translate(-50%, -20%)`
+                const hourForClock   = hours % this.hoursInClock
+                const minuteForClock = minutes % this.minutesInClock
+                const secondForClock = seconds % this.secondsInClock
+
+                // Угол часовой стрелки
+                const totalHour   = hourForClock + (minutes / this.minutesInClock) + (seconds / (this.secondsInClock * this.minutesInClock))
+                const hourAngle   = totalHour * this.degPerHour
+
+                // Угол минутной стрелки
+                const totalMinute = minuteForClock + (seconds / this.secondsInClock)
+                const minuteAngle = totalMinute* this.degPerMinute
+
+                // Угол секундной стрелки
+                const secondAngle = secondForClock  * this.degPerSecond
+
+                hourHand.style.transform   = `rotate(${hourAngle}deg)   translate(-50%, ${this.handSizes.hourHandOffset}%)`
+                minuteHand.style.transform = `rotate(${minuteAngle}deg) translate(-50%, ${this.handSizes.minuteHandOffset}%)`
+                secondHand.style.transform = `rotate(${secondAngle}deg) translate(-50%, ${this.handSizes.secondHandOffset}%)`
+
+                // Функция для создания единого вида числа в виде 2 цифр
                 function padZero(num) {
                     return num < 10 ? '0' + num : num
                 }
-                this.clockDigitalText.innerHTML = `${padZero(time.getHours())}:${padZero(time.getMinutes())}:${padZero(time.getSeconds())}`
+                this.clockDigitalText.innerHTML = `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`
             }
 
             destroy() {
@@ -255,7 +282,7 @@
         // --- Управление часами ---
         const input = document.getElementById('inputClockDiametr')
         const createBtn = document.getElementById('buttonMakeClocks')
-        const deleteBtn = document.getElementById('buttonDeleteClocks')
+        // const deleteBtn = document.getElementById('buttonDeleteClocks')
         const container = document.getElementById('clockContainer')
         const startButton = document.getElementById('startButton')
 
@@ -266,11 +293,13 @@
                 currentClock.destroy()
             }
             const diametr = parseInt(input.value)
-            if (diametr >= 200) {
+            
+            if (diametr >= 200 && diametr <= 800) {
+
                 startButton.remove()
                 currentClock = new Clocks(diametr, container)
             } else {
-                alert("Введите диаметр больше 200")
+                alert('Введите число от 200 и до 800')
             }
             
         })
