@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clock DOM</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        #clockBg {
+            display: flex;
+            position: relative;
+            background-color: orange;
+
+            border-radius: 50%;
+        }
+
+        #clockHoursLabelContainer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #clockHandsContainer {
+            position: absolute;
+            /* width: 100%;
+            height: 100%; */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(180deg);
+        }
+
+        #hourHand,
+        #minuteHand,
+        #secondHand {
+            position: absolute;
+
+            background-color: rgba(0, 0, 0);
+
+            border-radius: 50px;
+        }
+
+        #hourHand {
+            transform: translate(-50%, -0%) rotate(0deg);
+            transform-origin: 0% 0%;
+
+            height: 50px;
+            width: 10px;
+        }
+
+        #minuteHand {
+            transform: translate(-50%, -0%) rotate(0deg);
+            transform-origin: 0% 0%;
+
+            height: 75px;
+            width: 5px;
+        }
+
+        #secondHand {
+            transform: rotate(0deg) translate(-50%, -0%);
+            transform-origin: 0% 0%;
+            background-color: brown;
+            height: 90px;
+            width: 3px;
+        }
+
+        .hourLabel {
+            position: absolute;
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            width: 10px;
+            height: 10px;
+            background-color: green;
+            border-radius: 50%;
+
+
+            /* transform: translate(-50%, 0); */
+            transform-origin: 50% 500%;
+        }
+
+        .hourLabel::after {
+            position: absolute;
+            content: "";
+            display: block;
+            width: 1px;
+            height: 3px;
+            background-color: black;
+            bottom: 0;
+            border-radius: 50%;
+        }
+
+        #clockContainer {
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
+        }
+    </style>
+</head>
+
+<body>
+    <div id="startButton">
+        <label>Впишите размер часов:
+            <input id="inputClockDiametr" type="number" value="200">
+        </label>
+        <button id="buttonMakeClocks">Построить часы</button>
+    </div>
+
+    <div id="clockContainer"></div>
+    <script>
+
+        class Clocks {
+            constructor(diametr, container) {
+                this.diametr = diametr
+                this.container = container
+                this.clockBg = null
+                this.clockInterval = null
+                this.clockDigitalText = null
+
+                this.hoursInClock = 12
+                this.degPerHour = 360 / this.hoursInClock
+                this.procentOfLabel = 0.07
+                this.hoursLabelRadiusProcent = 15 * this.procentOfLabel * this.hoursInClock // Выверенный размер для циферблата
+                this.handSizes = {
+                    hourHand: 1 / 2,
+                    minuteHand: 3 / 4,
+                    secondHand: 9 / 10
+                }
+                this.paddingAroudClock = this.diametr / 20
+
+                this.createClockElements()
+                this.applySizes()
+                this.addClocks()
+                this.setHands()
+
+                this.clockInterval = setInterval(() => this.setHands(), 1000)
+            }
+
+            createClockElements() {
+                this.clockBg = document.createElement('div')
+                this.clockBg.id = 'clockBg'
+
+                this.clockHoursLabelContainer = document.createElement('div')
+                this.clockHoursLabelContainer.id = 'clockHoursLabelContainer'
+
+                const clockHandsContainer = document.createElement('div')
+                clockHandsContainer.id = 'clockHandsContainer'
+
+                this.clockHands = {
+                    hourHand: document.createElement('div'),
+                    minuteHand: document.createElement('div'),
+                    secondHand: document.createElement('div')
+                }
+                this.clockHands.hourHand.id = 'hourHand'
+                this.clockHands.minuteHand.id = 'minuteHand'
+                this.clockHands.secondHand.id = 'secondHand'
+
+                this.clockDigitalText = document.createElement('p')
+                this.clockDigitalText.id = 'clockDigitalText'
+                this.clockDigitalText.innerHTML = 'Hello'
+                this.clockDigitalText.style.position = 'absolute'
+                this.clockDigitalText.style.textAlign = 'center'
+
+                this.clockDigitalText.style.top = `${this.diametr / 4}px`
+                this.clockDigitalText.style.left = `0px`
+                this.clockDigitalText.style.width = `100%`
+
+
+
+                clockHandsContainer.append(this.clockHands.hourHand, this.clockHands.minuteHand, this.clockHands.secondHand)
+                this.clockBg.append(this.clockDigitalText)
+                this.clockBg.append(this.clockHoursLabelContainer, clockHandsContainer)
+
+
+                this.container.appendChild(this.clockBg)
+            }
+
+            applySizes() {
+                this.clockBg.style.width = this.diametr + 'px'
+                this.clockBg.style.height = this.diametr + 'px'
+
+                Object.keys(this.clockHands).forEach(handName => {
+                    const handElement = this.clockHands[handName]
+                    const handSize = this.handSizes[handName]
+                    const handLength = (this.diametr / 2) * handSize
+                    handElement.style.height = handLength + 'px'
+                })
+            }
+
+            addClocks() {
+                for (let i = 1; i <= this.hoursInClock; i++) {
+                    let element = document.createElement('div')
+                    let textWrap = document.createElement('p')
+                    let textNode = document.createTextNode(i)
+                    textWrap.appendChild(textNode)
+
+                    textWrap.style.transform = `rotate(-${this.degPerHour * i}deg)`
+                    element.appendChild(textWrap)
+                    element.className = 'hourLabel'
+
+                    const radius = this.diametr * this.hoursLabelRadiusProcent / 100
+                    const labelsPathRadius = (this.diametr / 2) - this.paddingAroudClock
+                    let magicValue = (labelsPathRadius / radius) * 100
+
+                    element.style.width = radius + 'px'
+                    element.style.height = radius + 'px'
+                    element.style.left = '50%'
+                    element.style.top = '0px'
+                    element.style.transformOrigin = `50% ${magicValue}%`
+                    element.style.transform = `translate(-50%, ${this.paddingAroudClock}px) rotate(${this.degPerHour * i}deg)`
+
+                    this.clockHoursLabelContainer.appendChild(element)
+                }
+            }
+
+            setHands() {
+                let time = new Date()
+                console.log(time)
+                const hourHand = this.clockHands.hourHand
+                const minuteHand = this.clockHands.minuteHand
+                const secondHand = this.clockHands.secondHand
+
+                let hours = time.getHours()
+                let minutes = time.getMinutes()
+                let seconds = time.getSeconds()
+
+                const hourForClock = hours % this.hoursInClock
+                const hourAngle = (hourForClock * this.degPerHour) + (minutes / 60) * this.degPerHour
+                const minuteAngle = (minutes / 60) * 360 + (seconds / 60) * (360 / 60)
+                const secondAngle = (seconds / 60) * 360
+
+                hourHand.style.transform = `rotate(${hourAngle}deg) translate(-50%, -10%)`
+                minuteHand.style.transform = `rotate(${minuteAngle}deg) translate(-50%, -10%)`
+                secondHand.style.transform = `rotate(${secondAngle}deg) translate(-50%, -20%)`
+                function padZero(num) {
+                    return num < 10 ? '0' + num : num
+                }
+                this.clockDigitalText.innerHTML = `${padZero(time.getHours())}:${padZero(time.getMinutes())}:${padZero(time.getSeconds())}`
+            }
+
+            destroy() {
+                clearInterval(this.clockInterval)
+                this.clockBg.remove()
+            }
+        }
+
+        // --- Управление часами ---
+        const input = document.getElementById('inputClockDiametr')
+        const createBtn = document.getElementById('buttonMakeClocks')
+        const deleteBtn = document.getElementById('buttonDeleteClocks')
+        const container = document.getElementById('clockContainer')
+        const startButton = document.getElementById('startButton')
+
+        let currentClock = null
+
+        createBtn.addEventListener('click', () => {
+            if (currentClock) {
+                currentClock.destroy()
+            }
+            const diametr = parseInt(input.value)
+            if (diametr >= 200) {
+                startButton.remove()
+                currentClock = new Clocks(diametr, container)
+            } else {
+                alert("Введите диаметр больше 200")
+            }
+            
+        })
+
+    </script>
+</body>
+
+</html>
