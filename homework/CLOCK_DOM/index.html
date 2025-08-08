@@ -135,17 +135,24 @@
                 this.hoursLabelRadiusProcent = 15 * this.procentOfLabel * this.hoursInClock // Выверенный размер для циферблата
                 this.handSizes = {       // Размер стрелок часов
                     hourHand: 1 / 2,     // Часовая стрелка
+                    hourHandWidth: 1/10, 
                     hourHandOffset: -10,   // Смещение центра вращения часовой стрелки на процет
+                    
+                    
                     minuteHand: 3 / 4,   // Минутная стрелка
                     minuteHandOffset: -10, // Смещение центра вращения минутной стрелки на процет
+                    minuteHandWidth: 1/20, 
+                    
                     secondHand: 10 / 10,   // Секундная стрелка
-                    secondHandOffset: -20 // Смещение центра вращения секундной стрелки на процет 
+                    secondHandOffset: -20, // Смещение центра вращения секундной стрелки на процет 
+                    secondHandWidth: 1/50
                 }
 
                 this.paddingAroudClock = this.diametr / 20 // Создание отсупа для цифр
 
-                this.clockDigitalTextTopRatio = 4 // Позизция цифровых часов относительно диаметра
-
+                this.clockDigitalTextTopRatio  = 4 // Позизция цифровых часов относительно диаметра
+                this.clockDigitalTextSizeRatio = 7 // Размер текста в процентах от диаметра часов
+                
                 // Создаем элементы часов и ставим на таймер
                 this.createClockElements()
                 this.applySizes()
@@ -179,11 +186,13 @@
                 this.clockDigitalText.innerHTML = '00:00:00'
                 this.clockDigitalText.style.position = 'absolute'
                 this.clockDigitalText.style.textAlign = 'center'
+                this.clockDigitalText.style.fontSize = `${this.diametr / 100 * this.clockDigitalTextSizeRatio}px`
 
                 this.clockDigitalText.style.top = `${this.diametr / this.clockDigitalTextTopRatio}px`
                 this.clockDigitalText.style.left = `0px`
                 this.clockDigitalText.style.width = `100%`
-                
+                this.clockDigitalText.style.height = `100%`
+
                 this.clockDigitalText.style.color = `blue`
                 this.clockDigitalText.style.fontFamily = "'Courier New', 'Roboto Mono', 'Source Code Pro', 'Ubuntu Mono', 'Droid Sans Mono', monospace"
                 this.clockDigitalText.style.fontWeight = 'bold'
@@ -204,8 +213,13 @@
                 Object.keys(this.clockHands).forEach(handName => {
                     const handElement = this.clockHands[handName]
                     const handSize = this.handSizes[handName]
+                    const handWidthProp = this.handSizes[`${handName}Width`]
+                    
                     const handLength = (this.diametr / 2) * handSize
+                    const handWidth = (this.diametr / 2) * handWidthProp
+
                     handElement.style.height = handLength + 'px'
+                    handElement.style.width = handWidth + 'px'
                 })
             }
 
@@ -214,10 +228,15 @@
                     let element = document.createElement('div')
                     let textWrap = document.createElement('p')
                     let textNode = document.createTextNode(i)
-                    textWrap.appendChild(textNode)
-
+                    
+                    
                     textWrap.style.transform = `rotate(-${this.degPerHour * i}deg)`
-                    element.appendChild(textWrap)
+                    textWrap.style.display = 'flex'
+                    textWrap.style.width = '100%'
+                    textWrap.style.height = '100%'
+                    textWrap.style.justifyContent = 'center'
+                    textWrap.style.alignItems ='center'
+                    textWrap.style.textAlign = 'center'
                     element.className = 'hourLabel'
 
                     const radius = this.diametr * this.hoursLabelRadiusProcent / 100
@@ -230,7 +249,11 @@
                     element.style.top = '0px'
                     element.style.transformOrigin = `50% ${transformOriginY}%`
                     element.style.transform = `translate(-50%, ${this.paddingAroudClock}px) rotate(${this.degPerHour * i}deg)`
+                    
+                    textWrap.style.fontSize = `${radius / 2}px`
 
+                    textWrap.appendChild(textNode)
+                    element.appendChild(textWrap)
                     this.clockHoursLabelContainer.appendChild(element)
                 }
             }
@@ -262,6 +285,8 @@
                 // Угол секундной стрелки
                 const secondAngle = secondForClock  * this.degPerSecond
 
+ 
+
                 hourHand.style.transform   = `rotate(${hourAngle}deg)   translate(-50%, ${this.handSizes.hourHandOffset}%)`
                 minuteHand.style.transform = `rotate(${minuteAngle}deg) translate(-50%, ${this.handSizes.minuteHandOffset}%)`
                 secondHand.style.transform = `rotate(${secondAngle}deg) translate(-50%, ${this.handSizes.secondHandOffset}%)`
@@ -271,6 +296,7 @@
                     return num < 10 ? '0' + num : num
                 }
                 this.clockDigitalText.innerHTML = `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`
+                
             }
 
             destroy() {
