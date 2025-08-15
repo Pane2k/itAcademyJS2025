@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TENNIS</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="button-wrap" style="margin-bottom: 16px;">
+        <button id="button-start">СТАРТ!</button>
+    </div>
+    <div id="game-fild-container" style="position: relative;"></div>
+    <script>
+
+        const gameFildSize = {
+            width: 400,
+            height: 300
+        }
+        const playerSize = {
+            width: 10,
+            height: 60
+        }
+        const firstPlayerKeyMapping = {
+            upKey: 'Shift',
+            downKey: 'Control'
+        }
+        const secondPlayerKeyMapping = {
+            upKey: 'ArrowUp',
+            downKey: 'ArrowDown'
+        }
+        const delta = 6
+        const ballRadius = 15
+        const PADDLE_INFLUENCE_FACTOR = 4
+        const SPEED_BOOST = 0.4
+        const MAX_SPEED = 15
+
+        class GameFild {
+            constructor(fildSize, mainContainer) {
+                this.domObject = null
+                this.container = mainContainer
+
+                this.width = fildSize.width + 'px'
+                this.height = fildSize.height + 'px'
+
+                this.bgColor = 'yellow'
+                this.borderColor = 'gray'
+                this.borderWidth = 2 + 'px'
+
+                this.createGameFild()
+            }
+            createGameFild() {
+                this.domObject = document.createElement('div')
+                this.domObject.id = 'game-fild'
+
+                this.domObject.style.width = this.width
+                this.domObject.style.height = this.height
+
+                this.domObject.style.backgroundColor = this.bgColor
+                this.domObject.style.outline = `solid ${this.borderWidth} ${this.borderColor}`
+
+                this.container.style.width = this.width
+                this.container.appendChild(this.domObject)
+            }
+            getFild() {
+                return this.domObject
+            }
+        }
+        class Player {
+            constructor(
+                playerSize,
+                keyMap,
+                playerID,
+                gameFildDiv,
+                gameFildSize,
+                playerXPos,
+                playerColor
+            ) {
+
+                this.width = playerSize.width
+                this.height = playerSize.height
+
+                this.gameFild = gameFildDiv
+                this.playerColor = playerColor
+                this.gameHeight = gameFildSize.height
+
+                this.playerRect = document.createElement('div')
+                this.playerRect.id = playerID
+                this.playerPosition = 0
+                this.velocity = 0
+                this.playerXPos = playerXPos
+
+                this.score = 0
+
+                this.moveDirection = ''
+
+                this.keyToMoveDown = keyMap.downKey
+                this.keyToMoveUp = keyMap.upKey
+
+                this.stylePlayer()
+            }
+
+            stylePlayer = () => {
+                this.playerRect.style.width = this.width + 'px'
+                this.playerRect.style.height = this.height + 'px'
+
+                this.playerRect.style.position = 'absolute'
+                this.playerRect.style.backgroundColor = this.playerColor
+
+
+                this.playerPosition = (this.gameHeight / 2) - (this.height / 2)
+                this.playerRect.style.top = `${this.playerPosition}px`
+                this.playerRect.style[this.playerXPos] = 0 + '%'
+
+                this.gameFild.appendChild(this.playerRect)
+            }
+
+            setMoveTo = (moveDir) => {
+                switch (moveDir) {
+
+                    case 'up':
+                        this.moveDirection = 'upMove'
+                        break
+                    case 'down':
+                        this.moveDirection = 'downMove'
+                        break
+                    case 'noMove':
+                        this.moveDirection = 'noMove'
+                        break
+                }
+            }
+            /**
+             * Значения:
+             * upMove
+             * downMove 
+             * noMove
+             */
+            getMove = () => {
+                return this.moveDirection
+            }
+            getPos = () => {
+                return this.playerPosition
+            }
+            addPos = (deltaPos) => {
+                let newPos = this.playerPosition + deltaPos
+                if (newPos <= 0) {
+                    this.playerRect.style.top = 0 + 'px'
+                    newPos = 0
+                } else if (newPos >= this.gameHeight - this.height) {
+                    this.playerRect.style.top = (this.gameHeight - this.height) + 'px'
+                    newPos = this.gameHeight - this.height
+                } else {
+                    this.playerRect.style.top = newPos + 'px'
+                }
+                this.playerPosition = newPos
+            }
+
+            getVelocity = () => {
+                return this.velocity
+            }
+
+            gameCycleTick = (deltaTime, pressedKeys) => {
+                this.velocity = 0
+                const deltaTimeNew = deltaTime / 10
+
+                if (pressedKeys.has(this.keyToMoveUp)) {
+                    this.addPos(-delta * deltaTimeNew)
+                    this.velocity = -delta
+
+                }
+                if (pressedKeys.has(this.keyToMoveDown)) {
+                    this.addPos(delta * deltaTimeNew)
+                    this.velocity = delta
+                }
+            }
+            getScore() {
+                return this.score
+            }
+            setScore(score) {
+                this.score = score
+            }
+            addOneWinScore() {
+                this.score += 1
+            }
+            restoreScore() {
+                this.score = 0
+            }
+            resetPosition() {
+                this.playerPosition = (this.gameHeight / 2) - (this.height / 2)
+                this.playerRect.style.top = `${this.playerPosition}px`
+            }
+        }
+
+        class Ball {
+            constructor(
+                ballRadius,
+                ballId,
+                gameFildContainer,
+                color
+            ) {
+                this.radius = ballRadius
+
+                this.gameFild = gameFildContainer
+                this.ballColor = color
+
+                this.ballRect = document.createElement('div')
+                this.ballRect.id = ballId
+
+                this.positionX = gameFildSize.width / 2
+                this.positionY = gameFildSize.height / 2
+
+                this.initialSpeed = 3
+                this.moveSpeed = this.initialSpeed
+
+                this.ballRect.style.width = (this.radius * 2) + 'px'
+                this.ballRect.style.height = (this.radius * 2) + 'px'
+                this.ballRect.style.borderRadius = '50%'
+
+                this.ballRect.style.backgroundColor = this.ballColor
+                this.ballRect.style.position = 'absolute'
+                this.ballRect.style.top = this.positionY + 'px'
+                this.ballRect.style.left = this.positionX + 'px'
+                this.ballRect.style.transform = 'translate(-50%, -50%)'
+
+                this.gameFild.appendChild(this.ballRect)
+
+                console.log(this.getRandomAngle())
+                console.log(this.getRandomAngle())
+                console.log(this.getRandomAngle())
+                this.ballAngle = this.getRandomAngle()
+
+            }
+            getRandomAngle() {
+                return Math.random() * 90 - 45
+            }
+            getPos() {
+                return [this.positionX, this.positionY]
+            }
+            setPos(x, y) {
+                this.positionX = x
+                this.positionY = y
+                this.ballRect.style.top = this.positionY + 'px'
+                this.ballRect.style.left = this.positionX + 'px'
+
+            }
+            getNewXY(speed, angle) {
+
+                const prevPose = this.getPos()
+                const [prevX, prevY] = prevPose
+                const angleInRadians = angle * (Math.PI / 180)
+
+                const newX = prevX + speed * Math.cos(angleInRadians)
+                const newY = prevY + speed * Math.sin(angleInRadians)
+
+                return [newX, newY]
+            }
+
+            reset() {
+                this.positionX = gameFildSize.width / 2
+                this.positionY = gameFildSize.height / 2
+
+                this.moveSpeed = this.initialSpeed
+                let angle = this.getRandomAngle()
+                if (Math.random() > 0.5) {
+                    angle += 180
+                }
+                this.ballAngle = angle
+
+                this.setPos(this.positionX, this.positionY)
+            }
+
+            checkForHit(player1, player2) {
+                const handlePaddleCollision = (player, paddleFrontEdge, isLeftPaddle) => {
+                    const p_top = player.getPos()
+                    const p_bottom = player.getPos() + playerSize.height
+
+                    const ballLeftEdge = this.positionX - this.radius
+                    const ballRightEdge = this.positionX + this.radius
+
+                    const isInHorizontalRange = isLeftPaddle ?
+                        (ballLeftEdge <= paddleFrontEdge && ballRightEdge >= 0) :
+                        (ballRightEdge >= paddleFrontEdge && ballLeftEdge <= gameFildSize.width)
+
+                    const isInVerticalRange = this.positionY + this.radius >= p_top &&
+                        this.positionY - this.radius <= p_bottom
+
+                    const hasCrossedPaddleFace = isLeftPaddle ?
+                        (ballLeftEdge <= paddleFrontEdge && ballRightEdge > paddleFrontEdge) :
+                        (ballRightEdge >= paddleFrontEdge && ballLeftEdge < paddleFrontEdge)
+
+                    if (isInVerticalRange && hasCrossedPaddleFace) {
+                        this.ballAngle = 180 - this.ballAngle
+
+                        this.positionX = isLeftPaddle ? (paddleFrontEdge + this.radius) : (paddleFrontEdge - this.radius)
+
+                        const playerVelocity = player.getVelocity()
+                        if (playerVelocity !== 0) {
+                            this.ballAngle += (playerVelocity > 0 ? PADDLE_INFLUENCE_FACTOR : -PADDLE_INFLUENCE_FACTOR)
+                            this.moveSpeed = Math.min(MAX_SPEED, this.moveSpeed + SPEED_BOOST)
+                        }
+                    }
+                }
+
+                const angleInRadians = this.ballAngle * (Math.PI / 180)
+                const verticalVelocity = Math.sin(angleInRadians)
+
+                if ((this.positionY - this.radius <= 0 && verticalVelocity < 0) ||
+                    (this.positionY + this.radius >= gameFildSize.height && verticalVelocity > 0)) {
+                    this.ballAngle = -this.ballAngle
+                }
+
+                if (this.positionX - this.radius <= 0) {
+                    return 'scorePlayer2'
+                }
+                if (this.positionX + this.radius >= gameFildSize.width) {
+                    return 'scorePlayer1'
+
+                    handlePaddleCollision(player1, playerSize.width, true)
+                    handlePaddleCollision(player2, gameFildSize.width - playerSize.width, false)
+
+                    this.ballAngle = (this.ballAngle % 360 + 360) % 360
+
+                    return 'noScore'
+                }
+            }
+            stopAtWall(scoreEvent) {
+                if (scoreEvent === 'scorePlayer1') {
+                    this.setPos(gameFildSize.width - this.radius, this.positionY)
+                }
+                else if (scoreEvent === 'scorePlayer2') {
+                    this.setPos(this.radius, this.positionY)
+                }
+            }
+            gameCycleTick(deltaTime, player1, player2) {
+
+                const prePos = this.getPos()
+                const [newX, newY] = this.getNewXY(this.moveSpeed, this.ballAngle)
+                this.setPos(newX, newY)
+                return this.checkForHit(player1, player2)
+
+            }
+        }
+
+
+
+        class GameScore {
+            constructor(initScore, players, gameFildContainer) {
+                this.player1 = players[0]
+                this.player2 = players[1]
+                this.score = initScore
+                this.player1.setScore(this.score[0])
+                this.player2.setScore(this.score[1])
+                console.log(players[0].getScore())
+                this.gameFildContainer = gameFildContainer
+
+                this.scoreDiv = document.createElement('div')
+                this.scoreDiv.id = 'score-fild'
+
+                this.scoreDiv.style.display = 'flex'
+                this.scoreDiv.style.justifyContent = 'center'
+
+                this.scoreDiv.style.position = 'absolute'
+                this.scoreDiv.style.top = '-22px'
+                this.scoreDiv.style.left = '50%'
+                this.scoreDiv.style.transform = 'translate(-50%, 0%)'
+                this.scoreDiv.style.font = 'small-caps bold 18px/1 sans-serif'
+                this.scoreDiv.innerText = `${this.player1.getScore()}:${this.player2.getScore()}`
+
+                this.gameFildContainer.prepend(this.scoreDiv)
+            }
+            addScore = (winningStr) => {
+                if (winningStr === 'scorePlayer1') {
+                    this.player1.addOneWinScore()
+                    this.recalScoreText()
+                }
+                else if (winningStr === 'scorePlayer2') {
+                    this.player2.addOneWinScore()
+                    this.recalScoreText()
+                }
+            }
+            recalScoreText = () => {
+                this.scoreDiv.innerText = `${this.player1.getScore()}:${this.player2.getScore()}`
+            }
+            resetScore = () => {
+                this.player1.restoreScore()
+                this.player2.restoreScore()
+                this.recalScoreText()
+            }
+        }
+        class Game {
+            constructor(gameFildSize, playerSize) {
+                this.gameFildContainer = document.getElementById('game-fild-container')
+                this.startButton = document.getElementById('button-start')
+
+                this.pressedKeys = new Set()
+                this.fps = 60
+                this.previewTimeFrame = 0
+                this.nowTimeFrame = 0
+
+                this.isGameRunning = false
+                this.gameInterval = null
+                this.gameFild = new GameFild(gameFildSize, this.gameFildContainer)
+
+                this.player1 = new Player(
+                    playerSize,
+                    firstPlayerKeyMapping,
+                    'first-player',
+                    this.gameFildContainer,
+                    gameFildSize,
+                    'left',
+                    'green'
+                )
+
+                this.player2 = new Player(
+                    playerSize,
+                    secondPlayerKeyMapping,
+                    'second-player',
+                    this.gameFildContainer,
+                    gameFildSize,
+                    'right',
+                    'blue'
+                )
+
+                this.gameBall = new Ball(
+                    ballRadius,
+                    'ball-main',
+                    this.gameFildContainer,
+                    'red'
+                )
+                this.scoreBoard = new GameScore([0, 0], [this.player1, this.player2], this.gameFildContainer)
+                this.setupEventListeners()
+                setInterval(this.gameCycle, 1000 / this.fps)
+            }
+
+            setupEventListeners = () => {
+                document.addEventListener('keydown', (event) => {
+                    event.preventDefault()
+
+                    this.pressedKeys.add(event.key)
+                })
+
+                document.addEventListener('keyup', (event) => {
+                    event.preventDefault()
+                    this.pressedKeys.delete(event.key)
+                })
+                this.startButton.addEventListener('click', () => {
+                    if (!this.isGameRunning) {
+                        this.startGame()
+                    } else {
+                        this.restartGame()
+                    }
+                })
+            }
+
+            startGame = () => {
+                this.isGameRunning = true
+                this.startButton.innerText = 'РЕСТАРТ!'
+                this.gameBall.reset()
+            }
+            restartGame = () => {
+                this.isGameRunning = false
+                this.startButton.innerText = 'СТАРТ!'
+                this.scoreBoard.resetScore()
+                this.player1.resetPosition()
+                this.player2.resetPosition()
+                this.gameBall.reset()
+            }
+            gameCycle = () => {
+                this.nowTimeFrame = Date.now()
+                let deltaTime = this.nowTimeFrame - this.previewTimeFrame
+
+                if (this.isGameRunning) {
+                    this.player1.gameCycleTick(deltaTime, this.pressedKeys)
+                    this.player2.gameCycleTick(deltaTime, this.pressedKeys)
+
+                    const scoreEvent = this.gameBall.gameCycleTick(deltaTime, this.player1, this.player2)
+
+                    if (scoreEvent !== 'noScore') {
+                        this.isGameRunning = false
+                        this.scoreBoard.addScore(scoreEvent)
+                        this.gameBall.stopAtWall(scoreEvent)
+
+                        this.startButton.innerText = 'СТАРТ!'
+                    }
+                }
+                this.previewTimeFrame = Date.now()
+            }
+        }
+        const game = new Game(gameFildSize, playerSize)
+    </script>
+</body>
+
+</html>
