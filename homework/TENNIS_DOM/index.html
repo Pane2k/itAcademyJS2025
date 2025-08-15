@@ -320,14 +320,14 @@
                 }
                 if (this.positionX + this.radius >= gameFildSize.width) {
                     return 'scorePlayer1'
-
-                    handlePaddleCollision(player1, playerSize.width, true)
-                    handlePaddleCollision(player2, gameFildSize.width - playerSize.width, false)
-
-                    this.ballAngle = (this.ballAngle % 360 + 360) % 360
-
-                    return 'noScore'
                 }
+                handlePaddleCollision(player1, playerSize.width, true)
+                handlePaddleCollision(player2, gameFildSize.width - playerSize.width, false)
+
+                this.ballAngle = (this.ballAngle % 360 + 360) % 360
+
+                return 'noScore'
+                
             }
             stopAtWall(scoreEvent) {
                 if (scoreEvent === 'scorePlayer1') {
