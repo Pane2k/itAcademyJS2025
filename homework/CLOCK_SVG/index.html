@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clock SVG</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        #clockContainer {
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="startButton">
+        <label>Впишите размер часов:
+            <input id="inputClockDiametr" type="number" value="200">
+        </label>
+        <button id="buttonMakeClocks">Построить часы</button>
+    </div>
+
+    <div id="clockContainer"></div>
+    <script>
+        class ClocksSVG {
+            constructor(diametr, container) {
+                // НАСТРОЙКА ЧАСОВ
+                this.diametr = diametr
+                this.container = container
+                this.clockBg = null
+                this.clockInterval = null
+                this.clockDigitalText = null
+                this.center = this.diametr / 2
+
+                // Установка времени
+                this.hoursInClock = 12   // Показатель сколько часов должно быть на циферблате
+                this.minutesInClock = 60 // Показатель сколько минут должно быть на циферблате
+                this.secondsInClock = 60 // Показатель сколько секунд должно быть на циферблате
+                
+                // Преобразование в 1 градус, для установки угла в часах
+                this.degPerHour   = 360 / this.hoursInClock   
+                this.degPerMinute = 360 / this.minutesInClock    
+                this.degPerSecond = 360 / this.secondsInClock
+
+                this.procentOfLabel = 7 / 100 // Подстроичное значение для размера круга в процентах
+                this.hoursLabelRadiusProcent = 15 * this.procentOfLabel * this.hoursInClock // Выверенный размер для циферблата
+                this.handSizes = {       // Размер стрелок часов
+                    hourHand: 1 / 2,     // Часовая стрелка
+                    hourHandWidth: 1/10, 
+                    hourHandOffset: -10,   // Смещение центра вращения часовой стрелки на процет
+                    
+                    minuteHand: 3 / 4,   // Минутная стрелка
+                    minuteHandWidth: 1/20, 
+                    minuteHandOffset: -10, // Смещение центра вращения минутной стрелки на процет
+                    
+                    secondHand: 10 / 10,   // Секундная стрелка
+                    secondHandWidth: 1/50,
+                    secondHandOffset: -20  // Смещение центра вращения секундной стрелки на процет 
+                }
+                
+                this.paddingAroudClock = this.diametr / 20 // Создание отсупа для цифр
+                this.clockDigitalTextTopRatio  = 4 // Позизция цифровых часов относительно диаметра
+                this.clockDigitalTextSizeRatio = 7 // Размер текста в процентах от диаметра часов
+                
+                // Создаем элементы часов и ставим на таймер
+                this.createClockElements()
+                this.applySizes()
+                this.addClocks()
+                this.setHands()
+
+                this.clockInterval = setInterval(() => this.setHands(), 1000)
+            }
+
+            createSVGElement(tag, attributes = {}) {
+                const el = document.createElementNS('http://www.w3.org/2000/svg', tag)
+                for (const key in attributes) {
+                    el.setAttribute(key, attributes[key])
+                }
+                return el
+            }
+
+            createClockElements() {
+                this.clockBg = this.createSVGElement('svg')
+                this.clockBg.setAttribute('id', 'clockBg')
+                
+                this.backgroundCircle = this.createSVGElement('circle')
+                this.clockBg.appendChild(this.backgroundCircle)
+
+                this.clockHoursLabelContainer = this.createSVGElement('g')
+                this.clockHoursLabelContainer.setAttribute('id', 'clockHoursLabelContainer')
+
+                const clockHandsContainer = this.createSVGElement('g')
+                clockHandsContainer.setAttribute('id', 'clockHandsContainer')
+                
+                this.clockHands = {
+                    hourHand:   this.createSVGElement('rect'),
+                    minuteHand: this.createSVGElement('rect'),
+                    secondHand: this.createSVGElement('rect')
+                }
+                this.clockHands.hourHand.setAttribute('id', 'hourHand')
+                this.clockHands.minuteHand.setAttribute('id', 'minuteHand')
+                this.clockHands.secondHand.setAttribute('id', 'secondHand')
+                
+                this.clockHands.hourHand.setAttribute('fill', 'rgba(0,0,0)')
+                this.clockHands.minuteHand.setAttribute('fill', 'rgba(0,0,0)')
+                this.clockHands.secondHand.setAttribute('fill', 'brown')
+
+                this.clockDigitalText = this.createSVGElement('text')
+                this.clockDigitalText.setAttribute('id', 'clockDigitalText')
+                this.clockDigitalText.textContent = '00:00:00'
+
+                clockHandsContainer.append(this.clockHands.hourHand, this.clockHands.minuteHand, this.clockHands.secondHand)
+                this.clockBg.append(this.clockHoursLabelContainer, clockHandsContainer, this.clockDigitalText)
+                
+                this.container.appendChild(this.clockBg)
+            }
+            
+            applySizes() {
+                this.clockBg.setAttribute('width', this.diametr)
+                this.clockBg.setAttribute('height', this.diametr)
+                
+                this.backgroundCircle.setAttribute('cx', this.center)
+                this.backgroundCircle.setAttribute('cy', this.center)
+                this.backgroundCircle.setAttribute('r', this.center)
+                this.backgroundCircle.setAttribute('fill', 'orange')
+
+                const digitalClockFontSize = this.diametr / 100 * this.clockDigitalTextSizeRatio
+                const digitalClockY = this.diametr / this.clockDigitalTextTopRatio
+                this.clockDigitalText.setAttribute('x', this.center)
+                this.clockDigitalText.setAttribute('y', digitalClockY)
+                this.clockDigitalText.setAttribute('font-size', `${digitalClockFontSize}px`)
+                this.clockDigitalText.setAttribute('font-family', "'Courier New', 'Roboto Mono', 'Source Code Pro', 'Ubuntu Mono', 'Droid Sans Mono', monospace")
+                this.clockDigitalText.setAttribute('font-weight', 'bold')
+                this.clockDigitalText.setAttribute('fill', 'blue')
+                this.clockDigitalText.setAttribute('text-anchor', 'middle')
+                this.clockDigitalText.setAttribute('dominant-baseline', 'hanging')
+
+                Object.keys(this.clockHands).forEach(handName => {
+                    const handElement = this.clockHands[handName]
+                    const handSize = this.handSizes[handName]
+                    const handWidthProp = this.handSizes[`${handName}Width`]
+                    const offsetPercent = this.handSizes[`${handName}Offset`]
+                    
+                    const handLength = (this.diametr / 2) * handSize
+                    const handWidth = (this.diametr / 2) * handWidthProp
+                    
+                    // Логика для смещения центра вращения стрелки, аналогичная DOM варианту
+                    const tailLength = handLength * (Math.abs(offsetPercent) / 100)
+                    const mainLength = handLength - tailLength
+
+                    handElement.setAttribute('width', handWidth)
+                    handElement.setAttribute('height', handLength)
+                    handElement.setAttribute('x', this.center - (handWidth / 2))
+                    handElement.setAttribute('y', this.center - mainLength) // Смещаем точку Y для имитации transform-origin
+                    handElement.setAttribute('rx', handWidth / 2) // Скругление углов
+                    handElement.setAttribute('ry', handWidth / 2) // Скругление углов
+                })
+            }
+
+            addClocks() {
+                const labelCircleDiametr = this.diametr * this.hoursLabelRadiusProcent / 100
+                const labelCircleRadius = labelCircleDiametr / 2
+                const labelsPathRadius = (this.diametr / 2) - this.paddingAroudClock - labelCircleRadius
+
+                for (let i = 1; i <= this.hoursInClock; i++) {
+                    const angle = i * this.degPerHour
+                    const angleRad = (angle - 90) * (Math.PI / 180) // -90 градусов для смещения начальной точки наверх
+
+                    const x = this.center + labelsPathRadius * Math.cos(angleRad)
+                    const y = this.center + labelsPathRadius * Math.sin(angleRad)
+
+                    const circleBg = this.createSVGElement('circle', { cx: x, cy: y, r: labelCircleRadius, fill: 'green' })
+                    
+                    const textWrap = this.createSVGElement('text', {
+                        x: x,
+                        y: y,
+                        'font-size': `${labelCircleRadius}px`,
+                        'font-family': 'inherit',
+                        'text-anchor': 'middle',
+                        'dominant-baseline': 'central'
+                    })
+                    textWrap.textContent = i
+                    
+                    this.clockHoursLabelContainer.appendChild(circleBg)
+                    this.clockHoursLabelContainer.appendChild(textWrap)
+                }
+            }
+
+            setHands() {
+                const time = new Date()
+                const hours = time.getHours()
+                const minutes = time.getMinutes()
+                const seconds = time.getSeconds()
+
+                const hourForClock   = hours % this.hoursInClock
+                
+                // Угол часовой стрелки
+                const totalHour   = hourForClock + (minutes / this.minutesInClock) + (seconds / (this.secondsInClock * this.minutesInClock))
+                const hourAngle   = totalHour * this.degPerHour
+
+                // Угол минутной стрелки
+                const totalMinute = minutes + (seconds / this.secondsInClock)
+                const minuteAngle = totalMinute * this.degPerMinute
+
+                // Угол секундной стрелки
+                const secondAngle = seconds  * this.degPerSecond
+                
+                this.clockHands.hourHand.setAttribute('transform', `rotate(${hourAngle} ${this.center} ${this.center})`)
+                this.clockHands.minuteHand.setAttribute('transform', `rotate(${minuteAngle} ${this.center} ${this.center})`)
+                this.clockHands.secondHand.setAttribute('transform', `rotate(${secondAngle} ${this.center} ${this.center})`)
+
+                // Функция для создания единого вида числа в виде 2 цифр
+                const padZero = (num) => num < 10 ? '0' + num : num
+                this.clockDigitalText.textContent = `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`
+            }
+
+            destroy() {
+                clearInterval(this.clockInterval)
+                this.clockBg.remove()
+            }
+        }
+
+        // --- Управление часами ---
+        const input = document.getElementById('inputClockDiametr')
+        const createBtn = document.getElementById('buttonMakeClocks')
+        const container = document.getElementById('clockContainer')
+        const startButton = document.getElementById('startButton')
+
+        let currentClock = null
+
+        createBtn.addEventListener('click', () => {
+            if (currentClock) {
+                currentClock.destroy()
+            }
+            const diametr = parseInt(input.value)
+            
+            if (diametr >= 200 && diametr <= 800) {
+                startButton.remove()
+                currentClock = new ClocksSVG(diametr, container)
+            } else {
+                alert('Введите число от 200 и до 800')
+            }
+        })
+    </script>
+</body>
+</html>
